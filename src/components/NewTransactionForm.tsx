@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 
@@ -14,6 +15,7 @@ const FormSchema = z.object({
     description: z.string().min(2, { message: "A descrição deve ter pelo menos 2 caracteres." }),
     amount: z.coerce.number().min(0.01, { message: "O valor deve ser maior que 0." }),
     date: z.string(),
+    category: z.enum(["alimentação", "transporte", "saúde", "diversão", "educação", "compras", "outros"]).optional(),
 });
 
 export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<typeof FormSchema>) => void, onDone?: () => void }) {
@@ -24,6 +26,7 @@ export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<
             description: "",
             amount: 0,
             date: new Date().toISOString().split('T')[0],
+            category: "outros",
         },
     });
 
@@ -76,6 +79,32 @@ export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<
                             <FormControl>
                                 <Input type="date" {...field} aria-invalid={!!form.formState.errors.date} />
                             </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Categoria</FormLabel>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione uma categoria" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="alimentação">🍔 Alimentação</SelectItem>
+                                    <SelectItem value="transporte">🚕 Transporte</SelectItem>
+                                    <SelectItem value="saúde">🏥 Saúde</SelectItem>
+                                    <SelectItem value="diversão">🎬 Diversão</SelectItem>
+                                    <SelectItem value="educação">📚 Educação</SelectItem>
+                                    <SelectItem value="compras">🛍️ Compras</SelectItem>
+                                    <SelectItem value="outros">📌 Outros</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}

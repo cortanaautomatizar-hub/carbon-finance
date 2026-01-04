@@ -243,14 +243,3 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 
 
 # Anotações - Work
-
-# app published 29/12 - 02h:06m: deploy: # [text] 
-
-
-# https://9000-firebase-meu-c6-finan-as-1766946726022.cluster-hkcruqmgzbd2aqcdnktmz6k7ba.cloudworkstations.dev/
-
-# https://9000-firebase-meu-c6-finan-as-1766946726022.cluster-hkcruqmgzbd2aqcdnktmz6k7ba.cloudworkstations.dev/login
-
-# https://9000-firebase-meu-c6-finan-as-1766946726022.cluster-hkcruqmgzbd2aqcdnktmz6k7ba.cloudworkstations.dev
-
-# https://9000-firebase-meu-c6-finan-as-1766946726022.cluster-hkcruqmgzbd2aqcdnktmz6k7ba.cloudworkstations.dev/

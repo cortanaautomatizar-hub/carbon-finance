@@ -4,6 +4,9 @@ import cardsService from "@/services/cards";
 import { CreditCardProps, Transaction } from "@/components/CreditCard";
 import { CreditCard } from "@/components/CreditCard";
 import { TransactionHistory } from "@/components/TransactionHistory";
+import { TransactionStats } from "@/components/TransactionStats";
+import { ExpenseChart } from "@/components/ExpenseChart";
+import { TransactionFilters } from "@/components/TransactionFilters";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -17,6 +20,7 @@ export default function CardDetail() {
   const navigate = useNavigate();
   const [card, setCard] = useState<CreditCardProps | null>(null);
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
 
   const load = () => {
     const found = id ? cardsService.getById(Number(id)) : undefined;
@@ -31,6 +35,12 @@ export default function CardDetail() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (card?.transactions) {
+      setFilteredTransactions(card.transactions);
+    }
+  }, [card]);
 
   if (!card) {
     return (
@@ -81,7 +91,16 @@ export default function CardDetail() {
 
       <CreditCard {...card} />
 
-      <TransactionHistory transactions={card.transactions || []} onRemove={handleRemoveTransaction} />
+      <TransactionStats transactions={card.transactions || []} />
+
+      <ExpenseChart transactions={card.transactions || []} type="pie" />
+
+      <TransactionFilters 
+        transactions={card.transactions || []} 
+        onFilterChange={setFilteredTransactions}
+      />
+
+      <TransactionHistory transactions={filteredTransactions} onRemove={handleRemoveTransaction} />
 
       <section className="bg-gradient-card rounded-2xl p-6 shadow-card">
         <h2 className="text-lg font-semibold mb-4">Limite do Cartão</h2>

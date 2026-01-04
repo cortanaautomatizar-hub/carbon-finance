@@ -5,6 +5,7 @@ export interface Transaction {
     description: string;
     amount: number;
     date: string;
+    category?: "alimentação" | "transporte" | "saúde" | "diversão" | "educação" | "compras" | "outros";
 }
 
 export interface CreditCardProps {
