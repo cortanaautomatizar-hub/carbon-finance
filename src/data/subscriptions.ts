@@ -1,0 +1,48 @@
+
+export const subscriptions = [
+  {
+    id: 1,
+    name: "Netflix",
+    amount: 39.9,
+    paymentMethod: "Débito Automático",
+    dueDate: 5,
+    status: "active",
+    category: "Streaming",
+  },
+  {
+    id: 2,
+    name: "Spotify",
+    amount: 21.9,
+    paymentMethod: "Cartão de Crédito",
+    dueDate: 10,
+    status: "active",
+    category: "Música",
+  },
+  {
+    id: 3,
+    name: "Amazon Prime",
+    amount: 14.9,
+    paymentMethod: "Cartão de Crédito",
+    dueDate: 15,
+    status: "paused",
+    category: "Streaming",
+  },
+  {
+    id: 4,
+    name: "Gympass",
+    amount: 129.9,
+    paymentMethod: "Débito Automático",
+    dueDate: 20,
+    status: "active",
+    category: "Saúde",
+  },
+  {
+    id: 5,
+    name: "Adobe Creative Cloud",
+    amount: 224.0,
+    paymentMethod: "Cartão de Crédito",
+    dueDate: 25,
+    status: "active",
+    category: "Software",
+  },
+];
