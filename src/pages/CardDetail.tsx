@@ -7,6 +7,7 @@ import { TransactionHistory } from "@/components/TransactionHistory";
 import { TransactionStats } from "@/components/TransactionStats";
 import { ExpenseChart } from "@/components/ExpenseChart";
 import { TransactionFilters } from "@/components/TransactionFilters";
+import { BudgetGoal } from "@/components/BudgetGoal";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -63,6 +64,16 @@ export default function CardDetail() {
     toast({ title: 'Transação removida' });
   };
 
+  const handleBudgetUpdate = (budget: number) => {
+    const updated: CreditCardProps = {
+      ...card,
+      monthlyBudget: budget,
+    } as CreditCardProps;
+    cardsService.update(card.id, updated);
+    load();
+    toast({ title: `Meta de gastos atualizada para R$ ${budget.toFixed(2)}` });
+  };
+
   const handlePayInvoice = () => {
     if (card.invoice.total === 0) return;
     const newHistoryEntry = {
@@ -92,6 +103,12 @@ export default function CardDetail() {
       <CreditCard {...card} />
 
       <TransactionStats transactions={card.transactions || []} />
+
+      <BudgetGoal 
+        monthlyBudget={card.monthlyBudget} 
+        transactions={card.transactions || []}
+        onBudgetUpdate={handleBudgetUpdate}
+      />
 
       <ExpenseChart transactions={card.transactions || []} type="pie" />
 

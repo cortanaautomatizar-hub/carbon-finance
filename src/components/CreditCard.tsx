@@ -21,6 +21,7 @@ export interface CreditCardProps {
     textColor: string;
     dueDay?: number;
     closingDay?: number;
+    monthlyBudget?: number;
     transactions?: Transaction[];
     invoice: {
         total: number;
