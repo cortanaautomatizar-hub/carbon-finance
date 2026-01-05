@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import cardsService from "@/services/cards";
 import { CreditCardProps } from "@/components/CreditCard";
+import { NotificationPanel } from "@/components/NotificationPanel";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -65,6 +66,14 @@ const CardsSummary = () => {
             <CreditCardIcon className="text-primary"/>
           </Button>
         </header>
+
+        {/* Painel de Notificações */}
+        <Card className="bg-card border-border p-6 mb-6">
+          <div className="flex items-center mb-4">
+            <h2 className="text-lg font-semibold">Notificações</h2>
+          </div>
+          <NotificationPanel cards={cards} />
+        </Card>
 
         <Card className="bg-card border-border p-6 mb-10">
           <div className="flex items-center mb-6">

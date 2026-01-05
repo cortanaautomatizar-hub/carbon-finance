@@ -9,6 +9,7 @@ import { ExpenseChart } from "@/components/ExpenseChart";
 import { TransactionFilters } from "@/components/TransactionFilters";
 import { BudgetGoal } from "@/components/BudgetGoal";
 import { VirtualCardGenerator } from "@/components/VirtualCardGenerator";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -23,6 +24,7 @@ export default function CardDetail() {
   const [card, setCard] = useState<CreditCardProps | null>(null);
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [notificationsShown, setNotificationsShown] = useState(false);
 
   const load = () => {
     const found = id ? cardsService.getById(Number(id)) : undefined;
@@ -95,6 +97,12 @@ export default function CardDetail() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
+      <NotificationCenter 
+        card={card} 
+        hasShownNotifications={notificationsShown}
+        onNotificationShown={() => setNotificationsShown(true)}
+      />
+
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => navigate('/resumo-cartoes') }>
           <ArrowLeft className="mr-2" /> Voltar ao Resumo
