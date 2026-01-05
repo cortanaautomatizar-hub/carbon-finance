@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { setUserId as setCardsUserId } from "@/services/cards";
 
-type User = { name?: string; email?: string; phone?: string };
+type User = { id?: number; name?: string; email?: string; phone?: string };
 
 interface AuthContextType {
   user: User | null;
@@ -34,11 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (u: User, t: string) => {
     setUser(u);
     setToken(t);
+    // Isolar dados por usuário
+    if (u.id) {
+      setCardsUserId(u.id);
+    }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    // Limpar userId ao fazer logout
+    setCardsUserId(null);
   };
 
   return (

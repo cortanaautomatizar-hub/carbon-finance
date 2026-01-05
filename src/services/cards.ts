@@ -1,11 +1,20 @@
 import { CreditCardProps, Transaction } from "@/components/CreditCard";
 import { cards as initialCards } from "@/data/cards";
 
-const STORAGE_KEY = "cards_data_v1";
+let currentUserId: number | null = null;
+
+const getStorageKey = (): string => {
+  if (!currentUserId) throw new Error("userId não está definido");
+  return `cards_data_v1_user_${currentUserId}`;
+};
+
+export const setUserId = (userId: number | null) => {
+  currentUserId = userId;
+};
 
 const loadStorage = (): CreditCardProps[] => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (!raw) return initialCards;
     return JSON.parse(raw) as CreditCardProps[];
   } catch (e) {
@@ -15,7 +24,7 @@ const loadStorage = (): CreditCardProps[] => {
 
 const saveStorage = (data: CreditCardProps[]) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(getStorageKey(), JSON.stringify(data));
   } catch (e) {
     // ignore
   }
