@@ -8,6 +8,7 @@ import { TransactionStats } from "@/components/TransactionStats";
 import { ExpenseChart } from "@/components/ExpenseChart";
 import { TransactionFilters } from "@/components/TransactionFilters";
 import { BudgetGoal } from "@/components/BudgetGoal";
+import { VirtualCardGenerator } from "@/components/VirtualCardGenerator";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -101,6 +102,10 @@ export default function CardDetail() {
       </div>
 
       <CreditCard {...card} />
+
+      <div className="flex justify-center">
+        <VirtualCardGenerator />
+      </div>
 
       <TransactionStats transactions={card.transactions || []} />
 
