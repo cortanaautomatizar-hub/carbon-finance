@@ -10,6 +10,7 @@ import { TransactionFilters } from "@/components/TransactionFilters";
 import { BudgetGoal } from "@/components/BudgetGoal";
 import { VirtualCardGenerator } from "@/components/VirtualCardGenerator";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { ExportStatement } from "@/components/ExportStatement";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -129,6 +130,15 @@ export default function CardDetail() {
         transactions={card.transactions || []} 
         onFilterChange={setFilteredTransactions}
       />
+
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Transações</h2>
+        <ExportStatement 
+          transactions={filteredTransactions} 
+          cardName={card.name}
+          cardNumber={card.number}
+        />
+      </div>
 
       <TransactionHistory transactions={filteredTransactions} onRemove={handleRemoveTransaction} />
 
