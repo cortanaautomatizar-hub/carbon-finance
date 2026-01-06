@@ -11,10 +11,23 @@ const USERS_KEY = 'users_v1';
 const loadUsers = (): UserRecord[] => {
   try {
     const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return raw ? JSON.parse(raw) : getDefaultUsers();
   } catch {
-    return [];
+    return getDefaultUsers();
   }
+};
+
+const getDefaultUsers = (): UserRecord[] => {
+  // Usuário padrão para testes
+  return [
+    {
+      id: 1,
+      name: "Usuário Teste",
+      email: "teste@teste.com",
+      phone: "+55 11 99999-9999",
+      password: "teste123"
+    }
+  ];
 };
 
 const saveUsers = (users: UserRecord[]) => {
@@ -30,7 +43,9 @@ export const register = (payload: { name: string; email: string; phone?: string;
   const exists = users.find(u => u.email === payload.email || (payload.phone && u.phone === payload.phone));
   if (exists) throw new Error('Usuário já cadastrado com esse e-mail/telefone');
 
-  const id = users.reduce((m, u) => Math.max(m, u.id), 0) + 1;
+  // Encontrar o maior ID existente
+  const maxId = users.reduce((m, u) => Math.max(m, u.id), 0);
+  const id = maxId + 1;
   const user: UserRecord = { id, ...payload } as UserRecord;
   users.push(user);
   saveUsers(users);
