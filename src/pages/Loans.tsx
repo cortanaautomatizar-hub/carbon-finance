@@ -1,37 +1,14 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { ArrowDownRight, CalendarClock, Landmark, Wallet } from "lucide-react";
+import { ArrowDownRight, CalendarClock } from "lucide-react";
 import { NewLoanForm } from "@/components/NewLoanForm";
 import { LoanReportDialog } from "@/components/LoanReportDialog";
 import { LoanFilters } from "@/components/LoanFilters";
+import { LoanCard } from "@/components/LoanCard";
+import { LoanSimulator } from "@/components/LoanSimulator";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-
-const stats = [
-  {
-    title: "Dívida total",
-    value: "R$ 45.200,00",
-    helper: "-2,5% vs mês anterior",
-    trend: "down" as const,
-  },
-  {
-    title: "Comprometimento mensal",
-    value: "R$ 1.250,00",
-    helper: "Próximo vencimento em 10 dias",
-    icon: <CalendarClock className="text-muted-foreground" size={18} />,
-    trend: undefined as undefined,
-  },
-  {
-    title: "Limite disponível",
-    value: "R$ 12.000,00",
-    helper: "Simule novo crédito",
-    highlight: true,
-    trend: undefined as undefined,
-  },
-];
 
 const loans = [
   {
@@ -107,34 +84,30 @@ const LoansPage = () => {
     return sum + installment;
   }, 0);
 
-  const availableLimit = 100000; // Crédito total disponível (exemplo)
+  const availableLimit = 100000;
   const usedCredit = loans.reduce((sum, loan) => {
     const original = parseFloat(loan.original.replace(/[^\d.]/g, ''));
     return sum + original;
   }, 0);
   const creditAvailable = availableLimit - usedCredit;
 
-  const nextDueDate = "10 de janeiro"; // Exemplo: seria calculado dinamicamente
+  const nextDueDate = "10 de janeiro";
   const daysUntilDue = 10;
 
-  // Calcular variação de dívida (exemplo: -2.5%)
   const debtVariation = -2.5;
   const isDebtDecreasing = debtVariation < 0;
 
   const handleSimulateCredit = () => {
-    // Scroll até o simulador de crédito
     const simulator = document.getElementById("credit-simulator");
     if (simulator) {
       simulator.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Filtrar empréstimos
   const filteredLoans = activeFilter === "all" 
     ? loans 
     : loans.filter(loan => loan.type === activeFilter);
 
-  // Ordenar por vencimento mais próximo
   const sortedLoans = [...filteredLoans].sort((a, b) => {
     const daysA = parseInt(a.due) || 999;
     const daysB = parseInt(b.due) || 999;
@@ -156,7 +129,6 @@ const LoansPage = () => {
 
       {/* Cards de Resumo Financeiro */}
       <div className="grid gap-4 md:grid-cols-3">
-        {/* Dívida Total */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Dívida Total</CardTitle>
@@ -178,7 +150,6 @@ const LoansPage = () => {
           </CardHeader>
         </Card>
 
-        {/* Comprometimento Mensal */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Comprometimento Mensal</CardTitle>
@@ -194,7 +165,6 @@ const LoansPage = () => {
           </CardHeader>
         </Card>
 
-        {/* Limite Disponível */}
         <Card className="bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-primary/5 border-yellow-500/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Limite Disponível</CardTitle>
@@ -230,7 +200,6 @@ const LoansPage = () => {
               </Button>
             </div>
             
-            {/* Filtros */}
             <LoanFilters 
               filters={filterOptions}
               activeFilter={activeFilter}
@@ -240,57 +209,20 @@ const LoansPage = () => {
 
           {sortedLoans.length > 0 ? (
             sortedLoans.map((loan) => (
-            <Card key={loan.id} className="border-border bg-card/80">
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Wallet size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{loan.contract}</p>
-                    <CardTitle className="text-lg">{loan.title}</CardTitle>
-                  </div>
-                </div>
-                <Badge variant={loan.statusVariant}>{loan.status}</Badge>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-4">
-                  <div className="space-y-1">
-                    <p>Valor original</p>
-                    <p className="text-foreground font-semibold">{loan.original}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p>Saldo devedor</p>
-                    <p className="text-foreground font-semibold">{loan.balance}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p>Parcela</p>
-                    <p className="text-foreground font-semibold">{loan.installment}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p>Vencimento</p>
-                    <p className="text-foreground font-semibold">{loan.due}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Progresso do pagamento</span>
-                    <span className="text-foreground font-semibold">{loan.progressLabel}</span>
-                  </div>
-                  <Progress value={loan.progress} className={cn(loan.progress === 100 && "bg-emerald-500/15")}
-                  />
-                </div>
-              </CardContent>
-
-              <CardFooter className="flex flex-col gap-3 sm:flex-row">
-                <Button variant="muted" className="w-full">Extrato</Button>
-                <Button variant={loan.status === "Finalizado" ? "outline" : "gold"} className="w-full">
-                  {loan.status === "Finalizado" ? "Ver histórico completo" : "Antecipar / Quitar"}
-                </Button>
-              </CardFooter>
-            </Card>
+              <LoanCard
+                key={loan.id}
+                id={loan.id}
+                title={loan.title}
+                contract={loan.contract}
+                status={loan.status as "Em dia" | "Finalizado" | "Atrasado"}
+                statusVariant={loan.statusVariant}
+                original={loan.original}
+                balance={loan.balance}
+                installment={loan.installment}
+                due={loan.due}
+                progressLabel={loan.progressLabel}
+                progress={loan.progress}
+              />
             ))
           ) : (
             <Card className="text-center py-12">
@@ -302,39 +234,7 @@ const LoansPage = () => {
         </div>
 
         <div className="space-y-4">
-          <Card id="credit-simulator" className="border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-card to-card scroll-mt-20">
-            <CardHeader>
-              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <Landmark size={18} className="text-amber-400" />
-                Simular Crédito
-              </div>
-              <CardTitle className="text-xl">Confira ofertas pré-aprovadas</CardTitle>
-              <CardDescription>Defina o valor desejado e o prazo para ver a estimativa da parcela.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">Valor desejado</label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
-                  <Input defaultValue="5000" type="number" className="bg-background pl-10" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">Número de parcelas</label>
-                <Input defaultValue="12" type="number" className="bg-background" />
-              </div>
-              <div className="rounded-lg border border-amber-500/30 bg-background/50 p-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Estimativa da parcela</span>
-                  <span className="font-semibold">R$ 468,90</span>
-                </div>
-                <p className="text-xs text-amber-400">Taxa simulada: 1,9% a.m.</p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" variant="gold">Ver ofertas disponíveis</Button>
-            </CardFooter>
-          </Card>
+          <LoanSimulator />
 
           <Card>
             <CardHeader>
@@ -354,7 +254,7 @@ const LoansPage = () => {
           <Card className="overflow-hidden border border-muted/40 bg-gradient-to-br from-primary/10 via-card to-card">
             <CardContent className="p-6 space-y-2">
               <Badge variant="default" className="bg-amber-500 text-primary-foreground hover:bg-amber-500">Novidade</Badge>
-              <CardTitle className="text-lg">Portabilidade de salário</CardTitle>
+              <CardTitle className="text-lg">Portabilidade de Salário</CardTitle>
               <CardDescription>Traga seu salário e ganhe melhores taxas nos seus empréstimos.</CardDescription>
               <Button variant="link" className="px-0 text-primary">Saiba mais</Button>
             </CardContent>
