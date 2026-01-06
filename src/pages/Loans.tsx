@@ -80,6 +80,39 @@ const tips = [
 ];
 
 const LoansPage = () => {
+  // Calcular totais dinâmicos
+  const totalDebt = loans.reduce((sum, loan) => {
+    const balance = parseFloat(loan.balance.replace(/[^\d.]/g, ''));
+    return sum + balance;
+  }, 0);
+
+  const monthlyCommitment = loans.reduce((sum, loan) => {
+    const installment = parseFloat(loan.installment.replace(/[^\d.]/g, ''));
+    return sum + installment;
+  }, 0);
+
+  const availableLimit = 100000; // Crédito total disponível (exemplo)
+  const usedCredit = loans.reduce((sum, loan) => {
+    const original = parseFloat(loan.original.replace(/[^\d.]/g, ''));
+    return sum + original;
+  }, 0);
+  const creditAvailable = availableLimit - usedCredit;
+
+  const nextDueDate = "10 de janeiro"; // Exemplo: seria calculado dinamicamente
+  const daysUntilDue = 10;
+
+  // Calcular variação de dívida (exemplo: -2.5%)
+  const debtVariation = -2.5;
+  const isDebtDecreasing = debtVariation < 0;
+
+  const handleSimulateCredit = () => {
+    // Scroll até o simulador de crédito
+    const simulator = document.getElementById("credit-simulator");
+    if (simulator) {
+      simulator.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 justify-between md:flex-row md:items-start">
@@ -93,30 +126,63 @@ const LoansPage = () => {
         </div>
       </div>
 
+      {/* Cards de Resumo Financeiro */}
       <div className="grid gap-4 md:grid-cols-3">
-        {stats.map((stat) => (
-          <Card
-            key={stat.title}
-            className={cn(stat.highlight && "bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-primary/5 border-yellow-500/30")}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-sm text-muted-foreground font-medium">{stat.title}</CardTitle>
-                {('icon' in stat) && stat.icon}
+        {/* Dívida Total */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Dívida Total</CardTitle>
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-3xl font-semibold">R$ {totalDebt.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              {isDebtDecreasing ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-400">
+                  <ArrowDownRight size={14} />
+                  {Math.abs(debtVariation).toFixed(1)}%
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-400">
+                  <ArrowDownRight size={14} className="rotate-180" />
+                  {Math.abs(debtVariation).toFixed(1)}%
+                </span>
+              )}
+            </div>
+            <CardDescription className="mt-3">vs mês anterior</CardDescription>
+          </CardHeader>
+        </Card>
+
+        {/* Comprometimento Mensal */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Comprometimento Mensal</CardTitle>
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-3xl font-semibold">R$ {monthlyCommitment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              <div className="flex size-8 items-center justify-center rounded-full bg-amber-500/15">
+                <CalendarClock size={16} className="text-amber-400" />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-semibold">{stat.value}</span>
-                {('trend' in stat) && stat.trend === "down" && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-400">
-                    <ArrowDownRight size={14} />
-                    {('helper' in stat) && stat.helper}
-                  </span>
-                )}
-              </div>
-              {!('trend' in stat) && ('helper' in stat) && <CardDescription>{stat.helper}</CardDescription>}
-            </CardHeader>
-          </Card>
-        ))}
+            </div>
+            <CardDescription className="mt-3">
+              Próximo vencimento em <span className="font-semibold text-foreground">{daysUntilDue} dias</span> ({nextDueDate})
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        {/* Limite Disponível */}
+        <Card className="bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-primary/5 border-yellow-500/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Limite Disponível</CardTitle>
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-3xl font-semibold">R$ {creditAvailable.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="px-0 text-primary hover:text-primary/80 mt-3 h-auto"
+              onClick={handleSimulateCredit}
+            >
+              Simular novo crédito →
+            </Button>
+          </CardHeader>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -185,11 +251,11 @@ const LoansPage = () => {
         </div>
 
         <div className="space-y-4">
-          <Card className="border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-card to-card">
+          <Card id="credit-simulator" className="border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-card to-card scroll-mt-20">
             <CardHeader>
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <Landmark size={18} className="text-amber-400" />
-                Simular Empréstimo
+                Simular Crédito
               </div>
               <CardTitle className="text-xl">Confira ofertas pré-aprovadas</CardTitle>
               <CardDescription>Defina o valor desejado e o prazo para ver a estimativa da parcela.</CardDescription>
