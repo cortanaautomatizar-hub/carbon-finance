@@ -85,30 +85,37 @@ const recentActivity = [
 
 const Investments = () => {
   return (
-    <div className="bg-[#121212] text-white p-4 sm:p-6 md:p-8 min-h-screen">
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-semibold">Investimentos</h1>
+        <p className="text-muted-foreground">Acompanhe e gerencie seu portfólio de investimentos</p>
+      </div>
+
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Patrimônio Total */}
-          <Card className="bg-[#1E1E1E] border-gray-700 lg:col-span-2">
+          <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-gray-400 text-sm font-medium">Patrimônio Total <Eye size={16} className="inline-block ml-2"/></CardTitle>
+              <CardTitle className="text-sm text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
+                Patrimônio Total <Eye size={16} className="inline-block"/>
+              </CardTitle>
               <div className="text-sm text-green-500 bg-green-500/10 px-2 py-1 rounded-md flex items-center">
                 <ArrowUp size={14} className="mr-1"/>
                 +2.4% este mês
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold">R$ 154.230,00</p>
-              <p className="text-gray-400 text-sm">Rendimento total: + R$ 3.420,12</p>
+              <p className="text-4xl font-semibold">R$ 154.230,00</p>
+              <p className="text-muted-foreground text-sm">Rendimento total: + R$ 3.420,12</p>
               <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                 {assetAllocation.map((asset) => (
                   <div key={asset.name}>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-300">{asset.name}</span>
-                      <span className="font-bold">{asset.value}%</span>
+                      <span>{asset.name}</span>
+                      <span className="font-semibold">{asset.value}%</span>
                     </div>
                     <Progress value={asset.value} className={`h-1.5 mt-1 ${asset.color}`} />
                   </div>
@@ -119,16 +126,16 @@ const Investments = () => {
           
           {/* Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            <Button className="w-full bg-yellow-400 text-black h-20 text-lg font-bold hover:bg-yellow-500 flex justify-between items-center">
+            <Button className="w-full h-20 text-lg font-semibold flex justify-between items-center">
               Investir
-              <span className="bg-black/10 rounded-full p-2"><Plus/></span>
+              <span className="bg-primary-foreground/10 rounded-full p-2"><Plus/></span>
             </Button>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="secondary" className="bg-[#1E1E1E] border-gray-700 h-20 text-md font-bold hover:bg-gray-700 flex flex-col gap-1">
+              <Button variant="secondary" className="h-20 text-md font-semibold flex flex-col gap-1">
                 <RefreshCw/>
                 Resgatar
               </Button>
-              <Button variant="secondary" className="bg-[#1E1E1E] border-gray-700 h-20 text-md font-bold hover:bg-gray-700 flex flex-col gap-1">
+              <Button variant="secondary" className="h-20 text-md font-semibold flex flex-col gap-1">
                 <Flag/>
                 Metas
               </Button>
@@ -137,21 +144,21 @@ const Investments = () => {
         </div>
 
         {/* Oportunidade do Dia */}
-        <Card className="bg-[#1E1E1E] border-yellow-400/50 flex items-center justify-between p-4">
+        <Card className="border-primary/50 flex items-center justify-between p-4">
             <div className="flex items-center">
-                <div className="bg-yellow-400/20 text-yellow-400 p-2 rounded-full mr-4">
+                <div className="bg-primary/20 text-primary p-2 rounded-full mr-4">
                     <Star/>
                 </div>
                 <div>
-                    <h3 className="font-bold">Oportunidade do Dia: CDB Carbon Pós-fixado</h3>
-                    <p className="text-sm text-gray-400">Rentabilidade de <span className="text-yellow-400 font-semibold">110% do CDI</span> com liquidez diária.</p>
+                    <h3 className="font-semibold">Oportunidade do Dia: CDB Carbon Pós-fixado</h3>
+                    <p className="text-sm text-muted-foreground">Rentabilidade de <span className="text-primary font-semibold">110% do CDI</span> com liquidez diária.</p>
                 </div>
             </div>
-            <Button variant="outline" className="border-gray-600 hover:bg-gray-700">Ver detalhes</Button>
+            <Button variant="outline">Ver detalhes</Button>
         </Card>
 
         {/* Visão Geral do Mercado */}
-         <Card className="bg-[#1E1E1E] border-gray-700">
+         <Card>
             <CardHeader>
                 <CardTitle>Visão Geral do Mercado</CardTitle>
             </CardHeader>
@@ -164,10 +171,10 @@ const Investments = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Meus Produtos</h2>
-                    <a href="#" className="text-yellow-400 text-sm font-semibold hover:underline">Ver todos</a>
+                    <h2 className="text-xl font-semibold">Meus Produtos</h2>
+                    <a href="#" className="text-primary text-sm font-semibold hover:underline">Ver todos</a>
                 </div>
-                <Card className="bg-[#1E1E1E] border-gray-700">
+                <Card>
                     <CardContent className="p-0">
                        <div className="overflow-x-auto">
                          <Table>
@@ -199,8 +206,8 @@ const Investments = () => {
                             </TableBody>
                          </Table>
                        </div>
-                        <div className="text-center p-4 border-t border-gray-700">
-                            <a href="#" className="text-yellow-400 text-sm font-semibold hover:underline flex items-center justify-center">Carregar mais <ChevronDown size={16} className="ml-1"/></a>
+                        <div className="text-center p-4 border-t">
+                            <a href="#" className="text-primary text-sm font-semibold hover:underline flex items-center justify-center">Carregar mais <ChevronDown size={16} className="ml-1"/></a>
                         </div>
                     </CardContent>
                 </Card>
@@ -208,22 +215,22 @@ const Investments = () => {
             
             {/* Evolução */}
             <div>
-                <h2 className="text-xl font-bold mb-4">Evolução</h2>
-                 <Card className="bg-[#1E1E1E] border-gray-700">
+                <h2 className="text-xl font-semibold mb-4">Evolução</h2>
+                 <Card>
                      <CardHeader>
-                        <div className="bg-gray-700 p-1 rounded-md flex">
-                            <Button size="sm" className="flex-1 bg-yellow-400 text-black hover:bg-yellow-500 h-8">6M</Button>
-                            <Button size="sm" variant="ghost" className="flex-1 text-gray-300 hover:bg-gray-600 h-8">1A</Button>
-                            <Button size="sm" variant="ghost" className="flex-1 text-gray-300 hover:bg-gray-600 h-8">YTD</Button>
+                        <div className="bg-accent p-1 rounded-md flex">
+                            <Button size="sm" className="flex-1 h-8">6M</Button>
+                            <Button size="sm" variant="ghost" className="flex-1 h-8">1A</Button>
+                            <Button size="sm" variant="ghost" className="flex-1 h-8">YTD</Button>
                         </div>
                      </CardHeader>
                      <CardContent className="h-60 flex items-end justify-between px-4">
                         {evolutionData.map(d => (
                             <div key={d.month} className="flex flex-col items-center gap-2 w-1/6">
                                 <div className="w-full h-full flex items-end">
-                                    <div className="bg-yellow-400 w-full rounded-t-sm" style={{ height: `${d.value}%`}}></div>
+                                    <div className="bg-primary w-full rounded-t-sm" style={{ height: `${d.value}%`}}></div>
                                 </div>
-                                <span className="text-xs text-gray-400">{d.month}</span>
+                                <span className="text-xs text-muted-foreground">{d.month}</span>
                             </div>
                         ))}
                      </CardContent>
@@ -233,16 +240,16 @@ const Investments = () => {
 
         {/* Atividade Recente */}
         <div>
-            <h2 className="text-xl font-bold mb-4">Atividade Recente</h2>
-            <Card className="bg-[#1E1E1E] border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">Atividade Recente</h2>
+            <Card>
                 <CardContent className="p-4 space-y-4">
                     {recentActivity.map((item, index) =>(
                         <div key={index} className="flex justify-between items-center">
                             <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center mr-3">{item.icon}</div>
+                                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center mr-3">{item.icon}</div>
                                 <div>
-                                    <p className="font-bold">{item.type}</p>
-                                    <p className="text-xs text-gray-400">{item.date}</p>
+                                    <p className="font-semibold">{item.type}</p>
+                                    <p className="text-xs text-muted-foreground">{item.date}</p>
                                 </div>
                             </div>
                             <div className={`font-semibold ${item.status === "credit" && "text-green-500"}`}>

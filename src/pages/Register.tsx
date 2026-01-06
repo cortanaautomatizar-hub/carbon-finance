@@ -3,10 +3,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, ArrowRight, User } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import authService from "@/services/auth";
 import { toast } from "@/components/ui/use-toast";
+import { Logo } from "@/components/Logo";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -48,10 +49,7 @@ const RegisterPage = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 bg-yellow-400 rounded-md flex items-center justify-center">
-                <User className="text-black"/>
-            </div>
-            <span className="text-2xl font-bold">Carbon <span className="font-light">FINANCE</span></span>
+            <Logo variant="light" className="h-10" />
           </div>
 
           <h1 className="text-3xl font-bold mb-2">Crie sua conta</h1>

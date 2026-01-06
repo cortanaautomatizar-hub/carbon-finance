@@ -170,8 +170,8 @@ export default function CreditCardPage() {
               )}
           </Carousel>
         ) : (
-          <div className="text-center py-10 bg-gradient-card rounded-2xl shadow-card">
-            <h2 className="text-2xl font-bold">Nenhum cartão cadastrado</h2>
+          <div className="text-center py-10 bg-card rounded-2xl shadow-sm border">
+            <h2 className="text-2xl font-semibold">Nenhum cartão cadastrado</h2>
             <p className="text-muted-foreground mt-2">Adicione um novo cartão para começar a usar o aplicativo.</p>
           </div>
         )}
@@ -180,13 +180,13 @@ export default function CreditCardPage() {
           <>
             <TransactionHistory transactions={selectedCard.transactions || []} />
             
-            <section className="bg-gradient-card rounded-2xl p-6 shadow-card animate-slide-up">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Limite do Cartão</h2>
+            <section className="bg-card rounded-2xl p-6 shadow-sm border">
+                <h2 className="text-lg font-semibold mb-4">Limite do Cartão</h2>
                 <div className="space-y-4">
                     <div className="flex justify-between items-end">
                         <div>
                             <span className="text-sm text-muted-foreground">Limite utilizado</span>
-                            <p className="text-2xl font-bold text-foreground">
+                            <p className="text-2xl font-semibold">
                                 R$ {selectedCard.used.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
@@ -201,18 +201,18 @@ export default function CreditCardPage() {
                     <div className="flex items-center justify-between p-4 bg-success/10 rounded-xl">
                         <div className="flex items-center gap-3">
                             <TrendingDown size={20} className="text-success" />
-                            <span className="text-foreground">Limite disponível</span>
+                            <span>Limite disponível</span>
                         </div>
-                        <span className="text-xl font-bold text-success">
+                        <span className="text-xl font-semibold text-success">
                             R$ {(selectedCard.limit - selectedCard.used).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                     </div>
                 </div>
             </section>
 
-            <section className="bg-gradient-card rounded-2xl p-6 shadow-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <section className="bg-card rounded-2xl p-6 shadow-sm border">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-foreground">Fatura Atual</h2>
+                    <h2 className="text-lg font-semibold">Fatura Atual</h2>
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedCard.invoice.total > 0 ? 'bg-primary/20 text-primary' : 'bg-success/20 text-success'}`}>
                         {selectedCard.invoice.total > 0 ? 'Aberta' : 'Paga'}
                     </span>
@@ -220,7 +220,7 @@ export default function CreditCardPage() {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <span className="text-sm text-muted-foreground">Valor atual</span>
-                        <p className="text-3xl font-bold text-foreground">
+                        <p className="text-3xl font-semibold">
                             R$ {selectedCard.invoice.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
                     </div>
@@ -245,10 +245,10 @@ export default function CreditCardPage() {
                 </div>
             </section>
 
-            <section className="bg-gradient-card rounded-2xl p-6 shadow-card animate-slide-up" style={{ animationDelay: "0.2s" }}>
+            <section className="bg-card rounded-2xl p-6 shadow-sm border">
                 <div className="flex items-center gap-2 mb-4">
                     <Percent size={20} className="text-primary" />
-                    <h2 className="text-lg font-semibold text-foreground">Parcelar Fatura</h2>
+                    <h2 className="text-lg font-semibold">Parcelar Fatura</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">Parcele sua fatura atual em até 12x</p>
                 <div className="space-y-3">
@@ -282,10 +282,10 @@ export default function CreditCardPage() {
                 </div>
             </section>
 
-            <section className="bg-gradient-card rounded-2xl p-6 shadow-card animate-slide-up" style={{ animationDelay: "0.3s" }}>
+            <section className="bg-card rounded-2xl p-6 shadow-sm border">
                 <div className="flex items-center gap-2 mb-4">
                     <Clock size={20} className="text-primary" />
-                    <h2 className="text-lg font-semibold text-foreground">Histórico de Faturas</h2>
+                    <h2 className="text-lg font-semibold">Histórico de Faturas</h2>
                 </div>
                 <div className="space-y-3">
                     {selectedCard.invoice.history.map((invoice, index) => (

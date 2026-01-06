@@ -66,7 +66,7 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-[#1C1C1C] border-gray-700 text-white">
+            <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Nova Assinatura</DialogTitle>
                     <DialogDescription>Preencha os detalhes do novo serviço.</DialogDescription>
@@ -74,17 +74,17 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
                 <div className="grid gap-6 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right">Serviço</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3 bg-[#2a2a2a] border-gray-600" />
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="amount" className="text-right">Valor (R$)</Label>
-                        <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="col-span-3 bg-[#2a2a2a] border-gray-600" />
+                        <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="category" className="text-right">Categoria</Label>
                         <Select onValueChange={setCategory} value={category}>
-                            <SelectTrigger className="col-span-3 bg-[#2a2a2a] border-gray-600"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                            <SelectContent className="bg-[#2a2a2a] border-gray-700 text-white">
+                            <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                            <SelectContent>
                                 {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                             </SelectContent>
                         </Select>
@@ -93,14 +93,14 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
                         <Label className="text-right">Cor</Label>
                         <div className="col-span-3 flex flex-wrap items-center gap-2">
                             {presetColors.map((preset) => (
-                                <button key={preset} type="button" style={{ backgroundColor: preset }} className={`h-7 w-7 rounded-full border-2 transition-transform ${color === preset ? 'border-white scale-110' : 'border-transparent'}`} onClick={() => setColor(preset)} />
+                                <button key={preset} type="button" style={{ backgroundColor: preset }} className={`h-7 w-7 rounded-full border-2 transition-transform ${color === preset ? 'border-primary scale-110' : 'border-transparent'}`} onClick={() => setColor(preset)} />
                             ))}
-                            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-24 bg-[#3a3a3a] border-gray-600" placeholder="#121212" />
+                            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-24" placeholder="#121212" />
                         </div>
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleSubmit} className="bg-yellow-400 text-black hover:bg-yellow-500">Adicionar Assinatura</Button>
+                    <Button onClick={handleSubmit}>Adicionar Assinatura</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -156,44 +156,44 @@ export const SubscriptionControl = () => {
     const daysToRenewal = upcomingRenewal ? differenceInDays(parseISO(upcomingRenewal.renewalDate), today) : 0;
 
     return (
-        <div className="bg-[#121212] text-white min-h-screen p-4 sm:p-6 lg:p-8">
+        <div className="space-y-8">
             <AddSubscriptionModal open={isModalOpen} onOpenChange={setIsModalOpen} onAddSubscription={handleAddSubscription} />
             
-            <div className="max-w-7xl mx-auto">
-                <header className="flex justify-between items-center mb-8">
+            <div>
+                <div className="flex justify-between items-start mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold">Controle de Assinaturas</h1>
-                        <p className="text-gray-400">Gerencie seus pagamentos recorrentes e serviços contratados</p>
+                        <h1 className="text-3xl font-semibold">Controle de Assinaturas</h1>
+                        <p className="text-muted-foreground">Gerencie seus pagamentos recorrentes e serviços contratados</p>
                     </div>
-                    <Button onClick={() => setIsModalOpen(true)} className="bg-yellow-400 text-black font-bold hover:bg-yellow-500">
+                    <Button onClick={() => setIsModalOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nova Assinatura
                     </Button>
-                </header>
+                </div>
 
                 {upcomingRenewal && daysToRenewal <= 5 && daysToRenewal >= 0 && (
-                    <div className="bg-[#1C1C1C] border-l-4 border-yellow-400 rounded-lg p-4 flex justify-between items-center mb-8 shadow-lg">
-                        <div className="flex items-center"><Bell className="text-yellow-400 mr-4" size={24} />
+                    <div className="bg-primary/10 border-l-4 border-primary rounded-lg p-4 flex justify-between items-center mb-8 shadow-lg">
+                        <div className="flex items-center"><Bell className="text-primary mr-4" size={24} />
                             <div>
-                                <h3 className="font-semibold text-yellow-400">Renovação Próxima <Badge variant="default" className="ml-2 bg-yellow-400/10 text-yellow-300">ATENÇÃO</Badge></h3>
-                                <p className="text-sm text-gray-300">Sua assinatura <span className="font-semibold">{upcomingRenewal.name}</span> será renovada em <span className="font-bold text-white">{daysToRenewal} dias</span>.</p>
+                                <h3 className="font-semibold text-primary flex items-center gap-2">Renovação Próxima <Badge variant="default" className="bg-primary/10 text-primary">ATENÇÃO</Badge></h3>
+                                <p className="text-sm">Sua assinatura <span className="font-semibold">{upcomingRenewal.name}</span> será renovada em <span className="font-semibold">{daysToRenewal} dias</span>.</p>
                             </div>
                         </div>
                     </div>
                 )}
 
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                   <Card className="bg-[#1C1C1C] border-0 rounded-lg p-5"><div className="flex items-center text-gray-400 mb-2"><Calendar size={16} className="mr-2" /><span>TOTAL MENSAL</span></div><p className="text-3xl font-bold">R$ {totalMonthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p></Card>
-                    <Card className="bg-[#1C1C1C] border-0 rounded-lg p-5"><div className="flex items-center text-gray-400 mb-2"><Calendar size={16} className="mr-2" /><span>PRÓXIMA COBRANÇA</span></div>{nextRenewal ? (<><p className="text-3xl font-bold">{format(parseISO(nextRenewal.renewalDate), 'd MMM', { locale: ptBR })}</p><p className="text-gray-400 text-sm">{nextRenewal.name} - R$ {nextRenewal.amount.toFixed(2)}</p></>) : <p className="text-gray-400 text-2xl font-bold">Nenhuma</p>}</Card>
-                    <Card className="bg-[#1C1C1C] border-0 rounded-lg p-5"><div className="flex items-center text-gray-400 mb-2"><CheckCircle size={16} className="mr-2" /><span>SERVIÇOS ATIVOS</span></div><p className="text-3xl font-bold">{activeCount}</p><p className="text-gray-400 text-sm">{inactiveCount} inativos</p></Card>
+                   <Card className="p-5"><div className="flex items-center text-muted-foreground mb-2 text-sm font-medium uppercase tracking-wider"><Calendar size={16} className="mr-2" /><span>TOTAL MENSAL</span></div><p className="text-3xl font-semibold">R$ {totalMonthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p></Card>
+                    <Card className="p-5"><div className="flex items-center text-muted-foreground mb-2 text-sm font-medium uppercase tracking-wider"><Calendar size={16} className="mr-2" /><span>PRÓXIMA COBRANÇA</span></div>{nextRenewal ? (<><p className="text-3xl font-semibold">{format(parseISO(nextRenewal.renewalDate), 'd MMM', { locale: ptBR })}</p><p className="text-muted-foreground text-sm">{nextRenewal.name} - R$ {nextRenewal.amount.toFixed(2)}</p></>) : <p className="text-muted-foreground text-2xl font-semibold">Nenhuma</p>}</Card>
+                    <Card className="p-5"><div className="flex items-center text-muted-foreground mb-2 text-sm font-medium uppercase tracking-wider"><CheckCircle size={16} className="mr-2" /><span>SERVIÇOS ATIVOS</span></div><p className="text-3xl font-semibold">{activeCount}</p><p className="text-muted-foreground text-sm">{inactiveCount} inativos</p></Card>
                 </section>
 
-                <Card className="bg-[#1C1C1C] border-0 rounded-lg p-4">
+                <Card className="p-4">
                     <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-                        <div className="relative flex-grow sm:flex-grow-0"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} /><Input placeholder="Buscar serviço..." className="bg-[#2a2a2a] border-gray-700 pl-10 w-full sm:w-64" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
-                        <div className="flex items-center gap-2"><span className="text-sm text-gray-400">Ordenar por:</span><DropdownMenu>
-                                <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="bg-[#2a2a2a] border-gray-700">{sortOrder === 'renewalDate' ? 'Data de Renovação' : 'Valor'}</Button></DropdownMenuTrigger>
-                                <DropdownMenuContent className="bg-[#2a2a2a] border-gray-700 text-white">
+                        <div className="relative flex-grow sm:flex-grow-0"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} /><Input placeholder="Buscar serviço..." className="pl-10 w-full sm:w-64" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
+                        <div className="flex items-center gap-2"><span className="text-sm text-muted-foreground">Ordenar por:</span><DropdownMenu>
+                                <DropdownMenuTrigger asChild><Button variant="outline" size="sm">{sortOrder === 'renewalDate' ? 'Data de Renovação' : 'Valor'}</Button></DropdownMenuTrigger>
+                                <DropdownMenuContent>
                                     <DropdownMenuItem onClick={() => setSortOrder('renewalDate')}>Data de Renovação</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setSortOrder('value_desc')}>Valor (Maior)</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setSortOrder('value_asc')}>Valor (Menor)</DropdownMenuItem>
@@ -202,22 +202,22 @@ export const SubscriptionControl = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[600px]">
-                            <thead className="border-b border-gray-700"><tr className="text-left text-xs text-gray-400 uppercase"><th className="py-3 px-4">Serviço</th><th className="py-3 px-4">Categoria</th><th className="py-3 px-4">Valor</th><th className="py-3 px-4">Renovação</th><th className="py-3 px-4">Status</th><th className="py-3 px-4 text-right">Ações</th></tr></thead>
+                            <thead className="border-b"><tr className="text-left text-xs text-muted-foreground uppercase"><th className="py-3 px-4">Serviço</th><th className="py-3 px-4">Categoria</th><th className="py-3 px-4">Valor</th><th className="py-3 px-4">Renovação</th><th className="py-3 px-4">Status</th><th className="py-3 px-4 text-right">Ações</th></tr></thead>
                             <tbody>{filteredSubscriptions.map(sub => {
                                     const daysLeft = differenceInDays(parseISO(sub.renewalDate), today);
                                     const bgColor = serviceColors[sub.name] || serviceColors.Default;
-                                    return (<tr key={sub.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                                    return (<tr key={sub.id} className="border-b hover:bg-accent/50">
                                             <td className="py-4 px-4 flex items-center gap-4">
                                                 <div style={{ backgroundColor: bgColor, color: 'white' }} className={'h-9 w-9 flex-shrink-0 flex items-center justify-center rounded-lg font-bold text-sm'}>{getInitials(sub.name)}</div>
-                                                <div><p className="font-semibold">{sub.name}</p><p className="text-sm text-gray-400">{sub.card}</p></div>
+                                                <div><p className="font-semibold">{sub.name}</p><p className="text-sm text-muted-foreground">{sub.card}</p></div>
                                             </td>
                                             <td className="py-4 px-4"><Badge variant="outline" className={categoryColors[sub.category] || ''}>{sub.category}</Badge></td>
                                             <td className="py-4 px-4 font-medium">R$ {sub.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                            <td className="py-4 px-4"><p>{format(parseISO(sub.renewalDate), 'dd MMM yyyy', { locale: ptBR })}</p><p className={`text-sm ${daysLeft <= 3 && daysLeft >= 0 ? 'text-yellow-400' : 'text-gray-400'}`}>Em {daysLeft} dias</p></td>
-                                            <td className="py-4 px-4"><Badge className={`${sub.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'} border-0`}>{sub.status === 'active' ? 'Ativa' : 'Pausada'}</Badge></td>
+                                            <td className="py-4 px-4"><p>{format(parseISO(sub.renewalDate), 'dd MMM yyyy', { locale: ptBR })}</p><p className={`text-sm ${daysLeft <= 3 && daysLeft >= 0 ? 'text-primary' : 'text-muted-foreground'}`}>Em {daysLeft} dias</p></td>
+                                            <td className="py-4 px-4"><Badge className={`${sub.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-primary/10 text-primary'} border-0`}>{sub.status === 'active' ? 'Ativa' : 'Pausada'}</Badge></td>
                                             <td className="py-4 px-4 text-right"><DropdownMenu>
                                                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="w-5 h-5" /></Button></DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="bg-[#2a2a2a] border-gray-700 text-white">
+                                                    <DropdownMenuContent>
                                                         <DropdownMenuItem>{sub.status === 'active' ? <><PauseCircle className="mr-2 h-4 w-4" />Pausar</> : <><PlayCircle className="mr-2 h-4 w-4" />Reativar</>}</DropdownMenuItem>
                                                         <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
                                                         <DropdownMenuItem className="text-red-400"><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>

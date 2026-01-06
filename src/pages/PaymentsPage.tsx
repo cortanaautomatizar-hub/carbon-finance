@@ -110,8 +110,11 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold">Registro de Pagamentos</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-semibold">Registro de Pagamentos</h1>
+        <p className="text-muted-foreground">Gerencie e acompanhe todos os seus pagamentos</p>
+      </div>
 
       <Card>
         <CardHeader>

@@ -15,6 +15,7 @@ import {
   Landmark
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "./Logo";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -69,12 +70,7 @@ export const Sidebar = () => {
     <aside className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-gold rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">C</span>
-          </div>
-          <span className="text-xl font-semibold text-foreground">Carbon</span>
-        </div>
+        <Logo variant="light" className="h-9" />
       </div>
 
       {/* Navigation */}

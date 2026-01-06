@@ -106,26 +106,28 @@ export default function FinancialAssistantPage() {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-4xl mx-auto bg-[#121212] text-white">
-      <header className="p-4 border-b border-gray-700">
+    <div className="h-full flex flex-col max-w-4xl mx-auto">
+      <header className="p-4 border-b">
         <div className="flex items-center gap-3">
-            <Sparkles className="text-yellow-400" size={32} />
-            <h1 className="text-3xl font-bold">Seu Assistente Financeiro</h1>
+            <div className="bg-primary/15 p-2 rounded-lg">
+                <Sparkles className="text-primary" size={32} />
+            </div>
+            <h1 className="text-3xl font-semibold">Seu Assistente Financeiro</h1>
         </div>
-        <p className="text-gray-400 mt-2">
+        <p className="text-muted-foreground mt-2">
             Converse com seu assistente para dicas personalizadas e inteligentes sobre suas finanças.
         </p>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-            <div className="flex h-full items-center justify-center text-gray-500">
+            <div className="flex h-full items-center justify-center text-muted-foreground">
                 <p>Faça uma pergunta para iniciar a análise.</p>
             </div>
         )}
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <Card className={`max-w-2xl ${msg.sender === 'user' ? 'bg-yellow-400 text-black' : 'bg-[#1C1C1C]'}`}>
+            <Card className={`max-w-2xl ${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : ''}`}>
               <CardContent className="p-4 whitespace-pre-wrap font-sans">
                 <p>{msg.text}</p>
               </CardContent>
@@ -134,7 +136,7 @@ export default function FinancialAssistantPage() {
         ))}
          {isLoading && (
           <div className="flex justify-start">
-            <Card className="max-w-lg bg-[#1C1C1C]">
+            <Card className="max-w-lg">
               <CardContent className="p-3">
                 <p className="animate-pulse">Analisando seus dados...</p>
               </CardContent>
@@ -144,7 +146,7 @@ export default function FinancialAssistantPage() {
         <div ref={messagesEndRef} />
       </main>
 
-      <footer className="p-4 border-t border-gray-700">
+      <footer className="p-4 border-t">
         <div className="relative">
           <Textarea
             placeholder="Ex: Analise minhas finanças..."
@@ -157,10 +159,10 @@ export default function FinancialAssistantPage() {
                 }
             }}
             rows={1}
-            className="bg-[#1C1C1C] border-gray-600 pr-12 resize-none focus:ring-yellow-400"
+            className="pr-12 resize-none"
           />
-          <Button onClick={handleSendMessage} disabled={isLoading || !input.trim()} className="absolute right-2.5 bottom-1/2 translate-y-1/2 h-8 w-8 bg-yellow-400 hover:bg-yellow-500" size="icon">
-            <Send size={16} className="text-black"/>
+          <Button onClick={handleSendMessage} disabled={isLoading || !input.trim()} className="absolute right-2.5 bottom-1/2 translate-y-1/2 h-8 w-8" size="icon">
+            <Send size={16}/>
           </Button>
         </div>
       </footer>
