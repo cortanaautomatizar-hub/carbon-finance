@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { ArrowDownRight, ArrowUpRight, CalendarClock, Landmark, Wallet } from "lucide-react";
+import { ArrowDownRight, CalendarClock, Landmark, Wallet } from "lucide-react";
+import { NewLoanForm } from "@/components/NewLoanForm";
+import { LoanReportDialog } from "@/components/LoanReportDialog";
 
 const stats = [
   {
@@ -83,11 +85,11 @@ const LoansPage = () => {
       <div className="flex flex-col gap-4 justify-between md:flex-row md:items-start">
         <div>
           <h1 className="text-3xl font-semibold">Meus Empréstimos</h1>
-          <p className="text-muted-foreground">Gerencie seus contratos, acompanhe limites e simule novas oportunidades.</p>
+          <p className="text-muted-foreground">Gerencie seus contratos ativos e acompanhe a evolução de suas dívidas. Crie novos empréstimos e visualize relatórios detalhados.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Adicionar tipo</Button>
-          <Button variant="gold" size="sm">Relatório</Button>
+          <NewLoanForm />
+          <LoanReportDialog />
         </div>
       </div>
 
