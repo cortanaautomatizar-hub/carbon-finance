@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { ArrowDownRight, CalendarClock, Landmark, Wallet } from "lucide-react";
 import { NewLoanForm } from "@/components/NewLoanForm";
 import { LoanReportDialog } from "@/components/LoanReportDialog";
+import { LoanFilters } from "@/components/LoanFilters";
+import { useState } from "react";
 
 const stats = [
   {
@@ -44,6 +46,7 @@ const loans = [
     due: "10 Out",
     progressLabel: "12/24",
     progress: 50,
+    type: "personal",
   },
   {
     id: 2,
@@ -57,6 +60,7 @@ const loans = [
     due: "15 Out",
     progressLabel: "5/48",
     progress: 10,
+    type: "vehicle",
   },
   {
     id: 3,
@@ -70,7 +74,17 @@ const loans = [
     due: "Pago",
     progressLabel: "60/60",
     progress: 100,
+    type: "guarantee",
   },
+];
+
+const filterOptions = [
+  { id: "all", label: "Todos", value: "all" },
+  { id: "personal", label: "Crédito Pessoal", value: "personal" },
+  { id: "vehicle", label: "Veículo", value: "vehicle" },
+  { id: "real-estate", label: "Imobiliário", value: "real-estate" },
+  { id: "revolving", label: "Crédito Rotativo", value: "revolving" },
+  { id: "guarantee", label: "Com Garantia", value: "guarantee" },
 ];
 
 const tips = [
@@ -80,6 +94,8 @@ const tips = [
 ];
 
 const LoansPage = () => {
+  const [activeFilter, setActiveFilter] = useState("all");
+
   // Calcular totais dinâmicos
   const totalDebt = loans.reduce((sum, loan) => {
     const balance = parseFloat(loan.balance.replace(/[^\d.]/g, ''));
@@ -112,6 +128,18 @@ const LoansPage = () => {
       simulator.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // Filtrar empréstimos
+  const filteredLoans = activeFilter === "all" 
+    ? loans 
+    : loans.filter(loan => loan.type === activeFilter);
+
+  // Ordenar por vencimento mais próximo
+  const sortedLoans = [...filteredLoans].sort((a, b) => {
+    const daysA = parseInt(a.due) || 999;
+    const daysB = parseInt(b.due) || 999;
+    return daysA - daysB;
+  });
 
   return (
     <div className="space-y-8">
@@ -187,15 +215,31 @@ const LoansPage = () => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <span className="size-2 rounded-full bg-yellow-400" />
-              Contratos ativos
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <span className="size-2 rounded-full bg-yellow-400" />
+                Contratos ativos ({filteredLoans.length})
+              </div>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => setActiveFilter("all")}
+              >
+                Próximo vencimento
+              </Button>
             </div>
-            <Button variant="secondary" size="sm">Próximo vencimento</Button>
+            
+            {/* Filtros */}
+            <LoanFilters 
+              filters={filterOptions}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+            />
           </div>
 
-          {loans.map((loan) => (
+          {sortedLoans.length > 0 ? (
+            sortedLoans.map((loan) => (
             <Card key={loan.id} className="border-border bg-card/80">
               <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -247,7 +291,14 @@ const LoansPage = () => {
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+            ))
+          ) : (
+            <Card className="text-center py-12">
+              <CardContent>
+                <p className="text-muted-foreground">Nenhum empréstimo encontrado para este filtro.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-4">
