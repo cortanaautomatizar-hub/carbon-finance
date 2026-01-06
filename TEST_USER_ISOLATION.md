@@ -143,14 +143,14 @@ JSON.parse(localStorage.getItem("cards_data_v1_user_3"))
 
 ## 📋 Checklist de Sucesso
 
-- [ ] João se registra e cria 2 cartões
-- [ ] Maria se registra e NÃO vê cartões de João
-- [ ] Pedro se registra e NÃO vê cartões de João/Maria
-- [ ] João faz login novamente e vê apenas seus 2 cartões
-- [ ] Maria faz login e vê apenas seu 1 cartão
-- [ ] Pedro faz login e vê apenas seus 3 cartões
-- [ ] localStorage tem chaves separadas por userId
-- [ ] Transações estão isoladas por usuário
+- [x] João se registra e cria 2 cartões
+- [x] Maria se registra e NÃO vê cartões de João
+- [x] Pedro se registra e NÃO vê cartões de João/Maria
+- [x] João faz login novamente e vê apenas seus 2 cartões
+- [x] Maria faz login e vê apenas seu 1 cartão
+- [x] Pedro faz login e vê apenas seus 3 cartões
+- [x] localStorage tem chaves separadas por userId
+- [x] Transações estão isoladas por usuário
 
 ---
 

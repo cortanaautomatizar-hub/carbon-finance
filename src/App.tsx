@@ -19,6 +19,7 @@ import LoginPage from "./pages/Login";
 import SettingsPage from "./pages/Settings";
 import RegisterPage from "./pages/Register";
 import ForgotPasswordPage from "./pages/ForgotPassword";
+import LoansPage from "./pages/Loans";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/cartao/:id" element={<CardDetail />} />
               <Route path="/resumo-cartoes" element={<CardsSummaryPage />} />
               <Route path="/assistente-ia" element={<FinancialAssistantPage />} />
+              <Route path="/emprestimos" element={<LoansPage />} />
               <Route path="/pagamentos" element={<PaymentsPage />} />
               <Route path="/investimentos" element={<Investments />} />
               <Route path="/assinaturas" element={<SubscriptionControl />} />

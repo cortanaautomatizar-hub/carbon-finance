@@ -11,7 +11,8 @@ import {
   HelpCircle,
   LogOut,
   Repeat,
-  Sparkles
+  Sparkles,
+  Landmark
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ const navItems = [
   { icon: <LayoutGrid size={20} />, label: "Resumo dos Cartões", path: "/resumo-cartoes" }, // Adicionado
   { icon: <Sparkles size={20} />, label: "Assistente IA", path: "/assistente-ia" },
   { icon: <ArrowLeftRight size={20} />, label: "Transferências", path: "/transferencias" },
+  { icon: <Landmark size={20} />, label: "Meus Empréstimos", path: "/emprestimos" },
   { icon: <Receipt size={20} />, label: "Pagamentos", path: "/pagamentos" },
   { icon: <TrendingUp size={20} />, label: "Investimentos", path: "/investimentos" },
   { icon: <Repeat size={20} />, label: "Controle de Assinaturas", path: "/assinaturas" },
