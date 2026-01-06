@@ -7,6 +7,9 @@ import { LoanReportDialog } from "@/components/LoanReportDialog";
 import { LoanFilters } from "@/components/LoanFilters";
 import { LoanCard } from "@/components/LoanCard";
 import { LoanSimulator } from "@/components/LoanSimulator";
+import { FinancialTipsCard } from "@/components/FinancialTipsCard";
+import { SalaryPortabilityCard } from "@/components/SalaryPortabilityCard";
+import { HelpCenterDialog } from "@/components/HelpCenterDialog";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
@@ -64,10 +67,22 @@ const filterOptions = [
   { id: "guarantee", label: "Com Garantia", value: "guarantee" },
 ];
 
-const tips = [
-  "Priorize quitar dívidas com juros maiores.",
-  "Antecipar parcelas pode reduzir o CET total.",
-  "Pagamentos em dia ajudam no score e liberam limites maiores.",
+const financialTips = [
+  {
+    id: 1,
+    title: "Priorize as taxas maiores",
+    description: "Ao antecipar pagamentos, foque primeiro nas dívidas com juros mais altos. Isso pode economizar até 30% em juros.",
+  },
+  {
+    id: 2,
+    title: "Mantenha a pontualidade",
+    description: "Pagamentos em dia impactam positivamente seu score e podem liberar limites maiores em futuras operações.",
+  },
+  {
+    id: 3,
+    title: "Simule antes de contratar",
+    description: "Use nossa ferramenta de simulação para comparar condições e escolher a melhor opção para seu perfil.",
+  },
 ];
 
 const LoansPage = () => {
@@ -236,29 +251,12 @@ const LoansPage = () => {
         <div className="space-y-4">
           <LoanSimulator />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Dicas financeiras</CardTitle>
-              <CardDescription>Boas práticas para economizar com juros.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              {tips.map((tip) => (
-                <div key={tip} className="flex items-start gap-2">
-                  <span className="mt-1 inline-block size-1.5 rounded-full bg-amber-400" />
-                  <p>{tip}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <FinancialTipsCard 
+            tips={financialTips}
+            onHelpClick={() => {}}
+          />
 
-          <Card className="overflow-hidden border border-muted/40 bg-gradient-to-br from-primary/10 via-card to-card">
-            <CardContent className="p-6 space-y-2">
-              <Badge variant="default" className="bg-amber-500 text-primary-foreground hover:bg-amber-500">Novidade</Badge>
-              <CardTitle className="text-lg">Portabilidade de Salário</CardTitle>
-              <CardDescription>Traga seu salário e ganhe melhores taxas nos seus empréstimos.</CardDescription>
-              <Button variant="link" className="px-0 text-primary">Saiba mais</Button>
-            </CardContent>
-          </Card>
+          <SalaryPortabilityCard />
         </div>
       </div>
     </div>
