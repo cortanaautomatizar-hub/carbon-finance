@@ -9,6 +9,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const FormSchema = z.object({
     name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
@@ -17,13 +22,13 @@ const FormSchema = z.object({
     expiry: z.string().min(5, { message: "A data de validade deve estar no formato MM/AA." }),
     cvv: z.string().min(3, { message: "O CVV deve ter 3 caracteres." }),
     limit: z.coerce.number().min(1, { message: "O limite deve ser maior que 0." }),
-    dueDay: z.coerce.number().min(1, { message: "O dia de vencimento deve ser maior que 0." }).max(31, { message: "O dia de vencimento deve ser menor que 31." }),
-    closingDay: z.coerce.number().min(1, { message: "O dia de fechamento deve ser maior que 0." }).max(31, { message: "O dia de fechamento deve ser menor que 31." }),
+    dueDay: z.date({ required_error: "Selecione o dia de vencimento." }),
+    closingDay: z.date({ required_error: "Selecione o dia de fechamento." }),
     color: z.string().min(4, { message: "A cor deve ser um hexadecimal válido." }),
     textColor: z.string().min(4, { message: "A cor do texto deve ser um hexadecimal válido." }),
 });
 
-export function NewCreditCardForm({ onSave }: { onSave: (data: z.infer<typeof FormSchema>) => void }) {
+export function NewCreditCardForm({ onSave }: { onSave: (data: any) => void }) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -32,15 +37,21 @@ export function NewCreditCardForm({ onSave }: { onSave: (data: z.infer<typeof Fo
             expiry: "",
             cvv: "",
             limit: 0,
-            dueDay: 1,
-            closingDay: 1,
+            dueDay: new Date(2026, 0, 10), // Default: dia 10
+            closingDay: new Date(2026, 0, 1), // Default: dia 1
             color: "#000000",
             textColor: "#FFFFFF",
         },
     });
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        onSave(data);
+        // Extract day from dates
+        const formattedData = {
+            ...data,
+            dueDay: data.dueDay.getDate(),
+            closingDay: data.closingDay.getDate(),
+        };
+        onSave(formattedData);
         toast({ title: "Cartão adicionado com sucesso!" });
     }
 
@@ -142,11 +153,32 @@ export function NewCreditCardForm({ onSave }: { onSave: (data: z.infer<typeof Fo
                         control={form.control}
                         name="dueDay"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                                 <FormLabel>Dia do Vencimento</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="10" {...field} />
-                                </FormControl>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? format(field.value, "dd") : <span>Dia</span>}
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -155,11 +187,32 @@ export function NewCreditCardForm({ onSave }: { onSave: (data: z.infer<typeof Fo
                         control={form.control}
                         name="closingDay"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                                 <FormLabel>Dia do Fechamento</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="1" {...field} />
-                                </FormControl>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? format(field.value, "dd") : <span>Dia</span>}
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                             </FormItem>
                         )}
