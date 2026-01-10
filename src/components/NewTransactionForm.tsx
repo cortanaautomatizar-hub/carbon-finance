@@ -9,23 +9,28 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const FormSchema = z.object({
     description: z.string().min(2, { message: "A descrição deve ter pelo menos 2 caracteres." }),
     amount: z.coerce.number().min(0.01, { message: "O valor deve ser maior que 0." }),
-    date: z.string(),
+    date: z.date({ required_error: "Por favor, selecione uma data." }),
     category: z.enum(["alimentação", "transporte", "saúde", "diversão", "educação", "compras", "outros"]).optional(),
 });
 
-export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<typeof FormSchema>) => void, onDone?: () => void }) {
+export function NewTransactionForm({ onSave, onDone }: { onSave: (data: any) => void, onDone?: () => void }) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         mode: 'onChange',
         defaultValues: {
             description: "",
             amount: 0,
-            date: new Date().toISOString().split('T')[0],
+            date: new Date(),
             category: "outros",
         },
     });
@@ -35,7 +40,12 @@ export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<
     }, [form.setFocus]);
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        onSave(data);
+        // Convert date to string format for compatibility
+        const formattedData = {
+            ...data,
+            date: format(data.date, 'yyyy-MM-dd'),
+        };
+        onSave(formattedData);
         toast({ title: "Transação adicionada com sucesso!" });
         form.reset();
         onDone?.();
@@ -74,11 +84,32 @@ export function NewTransactionForm({ onSave, onDone }: { onSave: (data: z.infer<
                     control={form.control}
                     name="date"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                             <FormLabel>Data</FormLabel>
-                            <FormControl>
-                                <Input type="date" {...field} aria-invalid={!!form.formState.errors.date} />
-                            </FormControl>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal",
+                                                !field.value && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {field.value ? format(field.value, "dd/MM/yyyy") : <span>Escolha a data</span>}
+                                        </Button>
+                                    </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
                             <FormMessage />
                         </FormItem>
                     )}
