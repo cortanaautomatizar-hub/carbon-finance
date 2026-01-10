@@ -3,10 +3,15 @@ import { Bell, Search, User, Settings, LifeBuoy, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+  const { unreadCount } = useNotifications();
 
   const handleLogout = () => {
     // Limpa sessão via contexto e redireciona
@@ -27,10 +32,28 @@ export const Header = () => {
         </button>
 
         {/* Notifications */}
-        <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all relative">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "w-10 h-10 rounded-lg relative",
+                unreadCount > 0 ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="p-0 w-96">
+            <NotificationDropdown />
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Profile Dropdown */}
         <DropdownMenu>
