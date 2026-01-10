@@ -10,8 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarComponent } from "@/components/ui/calendar";
 import { add, format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { cn } from "@/lib/utils";
 
 // --- DADOS E FUNÇÕES AUXILIARES ---
 
@@ -57,11 +60,12 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
     const [color, setColor] = useState("#71717A");
+    const [startDate, setStartDate] = useState<Date | undefined>(new Date());
 
     const presetColors = ["#E50914", "#1DB954", "#00A8E1", "#F26722", "#FF0000", "#3b5998", "#1da1f2", "#c71610", "#000000", "#71717A"];
 
     const handleSubmit = () => {
-        onAddSubscription({ name, amount: parseFloat(amount), category, color });
+        onAddSubscription({ name, amount: parseFloat(amount), category, color, startDate });
     };
 
     return (
@@ -88,6 +92,31 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
                                 {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Data</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "col-span-3 justify-start text-left font-normal",
+                                        !startDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Escolha a data</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
+                                <CalendarComponent
+                                    mode="single"
+                                    selected={startDate}
+                                    onSelect={setStartDate}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Cor</Label>
@@ -128,7 +157,7 @@ export const SubscriptionControl = () => {
             amount: newSub.amount,
             category: newSub.category,
             status: 'active',
-            renewalDate: add(today, { days: 30 }).toISOString(),
+            renewalDate: newSub.startDate ? add(newSub.startDate, { days: 30 }).toISOString() : add(today, { days: 30 }).toISOString(),
             card: 'Cartão final 8842'
         };
 
