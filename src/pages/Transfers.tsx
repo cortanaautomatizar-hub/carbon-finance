@@ -338,7 +338,7 @@ export default function Transfers() {
                             {date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : 'mm/dd/yyyy'}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
                           <Calendar
                             mode="single"
                             selected={date}
@@ -452,7 +452,7 @@ export default function Transfers() {
                             {date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : 'mm/dd/yyyy'}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
                           <Calendar
                             mode="single"
                             selected={date}
@@ -509,7 +509,7 @@ export default function Transfers() {
                             {date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : 'mm/dd/yyyy'}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 border-slate-800 bg-slate-900" align="start">
                           <Calendar
                             mode="single"
                             selected={date}
