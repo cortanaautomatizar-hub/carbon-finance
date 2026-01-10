@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 import cardsService from "@/services/cards";
 import { CreditCardProps } from "@/components/CreditCard";
 import { NotificationPanel } from "@/components/NotificationPanel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NewCreditCardForm } from "@/components/NewCreditCardForm";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -15,6 +17,7 @@ const formatCurrency = (value: number) => {
 
 const CardsSummary = () => {
   const [cards, setCards] = useState<CreditCardProps[]>([]);
+  const [isCardFormOpen, setIsCardFormOpen] = useState(false);
 
   const load = () => setCards(cardsService.getAll());
 
@@ -28,24 +31,22 @@ const CardsSummary = () => {
     load();
   };
 
-  const handleAdd = () => {
-    const name = prompt('Nome do cartão');
-    if (!name) return;
-    const final = prompt('Últimos 4 dígitos');
-    const limitStr = prompt('Limite (ex: 15000)');
-    const limit = limitStr ? Number(limitStr) : 0;
-    const newCard = cardsService.create({
-      name,
-      number: `**** **** **** ${final ?? '0000'}`,
-      expiry: '01/30',
-      brand: undefined,
-      limit,
-      color: '#111827',
-      textColor: '#ffffff',
-      used: 0,
-      cvv: '000',
+  const handleSaveCard = (newCardData: any) => {
+    const created = cardsService.create({
+      name: newCardData.name,
+      number: newCardData.number,
+      expiry: newCardData.expiry,
+      cvv: newCardData.cvv,
+      brand: newCardData.brand,
+      limit: newCardData.limit,
+      color: newCardData.color || '#111827',
+      textColor: newCardData.textColor || '#ffffff',
+      dueDay: newCardData.dueDay,
+      closingDay: newCardData.closingDay,
     } as any);
-    setCards((s) => [...s, newCard]);
+
+    load();
+    setIsCardFormOpen(false);
   };
 
   const totalGasto = cards.reduce((acc, card) => acc + (card.used ?? 0), 0);
@@ -163,9 +164,19 @@ const CardsSummary = () => {
             </Card>
           ))}
           <Card className="bg-card border-dashed border-border flex flex-col items-center justify-center p-5 min-h-[220px]">
-            <Button onClick={handleAdd} variant="ghost" className="w-16 h-16 rounded-full bg-secondary mb-3">
-                <Plus size={32} />
-            </Button>
+            <Dialog open={isCardFormOpen} onOpenChange={setIsCardFormOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" className="w-16 h-16 rounded-full bg-secondary mb-3">
+                  <Plus size={32} />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Adicionar Novo Cartão</DialogTitle>
+                </DialogHeader>
+                <NewCreditCardForm onSave={handleSaveCard} />
+              </DialogContent>
+            </Dialog>
             <p className="font-semibold mb-1">Adicionar Cartão</p>
             <p className="text-xs text-muted-foreground">Conecte uma nova conta</p>
           </Card>
