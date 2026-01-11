@@ -13,6 +13,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Usuário demo para desenvolvimento/demo
+const DEMO_USER: User = {
+  id: 1,
+  name: "Demo User",
+  email: "demo@carbonfinance.com",
+  phone: "+55 11 99999-9999",
+};
+
+const DEMO_TOKEN = "demo_token_123456789";
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
@@ -23,6 +33,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("auth_token"));
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Auto-login na primeira inicialização se não houver sessão
+  useEffect(() => {
+    if (!isInitialized && !token && !user) {
+      // Fazer auto-login com usuário demo
+      setUser(DEMO_USER);
+      setToken(DEMO_TOKEN);
+      setCardsUserId(DEMO_USER.id!);
+      setIsInitialized(true);
+    } else {
+      setIsInitialized(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (token) localStorage.setItem("auth_token", token);
