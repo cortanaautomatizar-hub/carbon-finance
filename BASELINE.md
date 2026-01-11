@@ -67,7 +67,66 @@
 ✅ Sem erros no console
 ```
 
-## 🔗 Links Importantes
+## � Development Guidelines - Práticas Seguras
+
+### ✅ Checklist Antes de Fazer Commit
+
+```bash
+# 1. Testar localmente
+npm run dev
+# Verificar no browser: http://localhost:5173
+
+# 2. Ver o que vai ser commitado
+git status
+git diff
+
+# 3. Fazer stage APENAS dos arquivos desejados (NUNCA usar git add .)
+git add arquivo1.tsx arquivo2.ts
+# NÃO FAZER: git add .
+
+# 4. Revisar novamente
+git diff --staged
+
+# 5. Commitar com mensagem clara
+git commit -m "Feature: descrição clara da mudança"
+
+# 6. Revisar o commit
+git log --oneline -1
+
+# 7. Push para GitHub
+git push
+```
+
+### ⚠️ Evitar ao Máximo
+
+- ❌ `git add .` sem revisar - pega arquivos acidentalmente alterados
+- ❌ Usar formatadores automáticos sem cuidado (podem alterar URLs críticas)
+- ❌ Fazer push sem testar localmente
+- ❌ Editar `index.html`, `README.md`, `vite.config.ts`, `vercel.json` sem razão explícita
+- ❌ Quebras de linha e reformatações acidentais
+
+### 🔒 Proteção Contra Quebras
+
+**Configuração Vercel (IMPORTANTE):**
+1. Ir para: https://vercel.com/cortanas-projects-66cf4d9c/carbon-finance-vqbg/settings/git
+2. Em "Deployments", desabilitar "Automatic Deployments" PARA PRODUCTION
+3. OU ativar "Require Promotion" (fazer deploy manual)
+
+**Resultado:** Novos commits não quebram produção automaticamente.
+
+### 🛡️ Pre-commit Hook
+
+Um arquivo `.husky/pre-commit` foi configurado para:
+- ✅ Prevenir `git add .` acidental
+- ✅ Avisar sobre arquivos críticos sendo modificados
+- ✅ Verificar sintaxe de commits
+
+Execute uma única vez para instalar:
+```bash
+npm run prepare
+```
+
+## �🔗 Links Importantes
 
 - **Código-Fonte:** https://github.com/cortanaautomatizar-hub/carbon-finance
 - **Vercel Project:** https://vercel.com/cortanas-projects-66cf4d9c/carbon-finance-vqbg

@@ -1,0 +1,51 @@
+#!/bin/sh
+# Commit-msg hook para validar formato das mensagens de commit
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Cores
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# 1. Verificar se a mensagem começa com um prefixo válido
+if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|revert|update|remove|add): "; then
+    echo "${RED}❌ ERRO: Mensagem de commit inválida!${NC}"
+    echo ""
+    echo "Use um dos prefixos abaixo:"
+    echo "  feat:     Nova feature"
+    echo "  fix:      Bug fix"
+    echo "  docs:     Documentação"
+    echo "  style:    Formatação (sem mudança de código)"
+    echo "  refactor: Refatoração"
+    echo "  test:     Testes"
+    echo "  chore:    Build, deps, etc"
+    echo "  perf:     Performance"
+    echo "  ci:       CI/CD"
+    echo "  update:   Atualização"
+    echo "  remove:   Remoção"
+    echo "  add:      Adição"
+    echo "  revert:   Revert de commit"
+    echo ""
+    echo "Exemplo: ${GREEN}feat: adicionar novo componente de notificação${NC}"
+    exit 1
+fi
+
+# 2. Verificar se tem espaço após o prefixo
+if echo "$COMMIT_MSG" | grep -qE "^[a-z]+:[^ ]"; then
+    echo "${RED}❌ ERRO: Use espaço após o prefixo!${NC}"
+    echo "Exemplo: ${GREEN}feat: descrição${NC}"
+    exit 1
+fi
+
+# 3. Verificar se a primeira linha tem no máximo 72 caracteres
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n1)
+if [ ${#FIRST_LINE} -gt 72 ]; then
+    echo "${YELLOW}⚠️  AVISO: Primeira linha muito longa (${#FIRST_LINE} chars, máximo 72)${NC}"
+fi
+
+echo "${GREEN}✅ Mensagem de commit validada!${NC}"
+
+exit 0
