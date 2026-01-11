@@ -164,6 +164,57 @@ npm run build
 - **c8d9285** - "chore: npm audit fix router" (apenas fix seguro)
 - **007c1f6** - "chore: audit fix --force (vite 7)" (upgrade major de Vite)
 
+### Commits de Funcionalidades (11 de Janeiro)
+
+- **495f67b** - "feat: adicionar grafico de pizza com gastos por cartao no dashboard"
+- **0bcab4f** - "feat: redesenhar grafico de pizza para gastos por categoria com cores amarelo e cinza"
+- **8debc84** - "feat: adicionar auto-login com usuario demo para facilitar acesso"
+- **3c05f1d** - "feat: permitir login com um clique sem preencher credenciais (demo mode)"
+
+## 🔐 Modo Demo & Login Simplificado
+
+### Auto-Login Automático
+
+O sistema possui **auto-login automático** para facilitar demos e testes:
+
+- ✅ Ao abrir a aplicação pela primeira vez (sem sessão), faz login automaticamente
+- ✅ Usuário Demo pré-configurado (ID: 1, Email: demo@carbonfinance.com)
+- ✅ Dados persistem no localStorage
+
+### Login com Um Clique
+
+Na tela de Login (`/login`):
+- Deixe os campos **email e senha vazios**
+- Clique em **"Entrar"**
+- Sistema usa credenciais demo e redireciona para Dashboard
+
+**Credenciais Demo:**
+```
+Email: demo@carbonfinance.com
+Nome: Demo User
+Telefone: +55 11 99999-9999
+Token: demo_token_123456789
+```
+
+⚠️ **Nota:** Este modo é ideal para demos e desenvolvimento. Para produção real, desabilite o auto-login no `AuthContext.tsx`.
+
+## 📊 Dashboard - Novas Funcionalidades
+
+### Gráfico de Gastos por Categoria
+
+Adicionado ao Dashboard um **gráfico de pizza (donut)** que mostra:
+
+- 📈 Distribuição de gastos por categoria (Alimentação, Transporte, Lazer, Outros)
+- 🎨 Cores da paleta Carbon Finance (amarelo: `#FFCA3A`, cinzas: `#6B7280`, `#9CA3AF`, `#D1D5DB`)
+- 🔄 Dropdown de filtro por período (Semanal/Mensal/Anual)
+- 💰 Total faturado com breakdown detalhado
+- 📋 Legenda clara com valores e percentuais
+
+**Categorização Automática:**
+- Analisa descrições das transações
+- Mapeia palavras-chave para categorias
+- Suporta transações de todos os cartões
+
 ## 🔗 Links Importantes
 
 - **Código-Fonte:** https://github.com/cortanaautomatizar-hub/carbon-finance
