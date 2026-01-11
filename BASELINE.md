@@ -67,7 +67,7 @@
 ✅ Sem erros no console
 ```
 
-## � Development Guidelines - Práticas Seguras
+## 📚 Development Guidelines - Práticas Seguras
 
 ### ✅ Checklist Antes de Fazer Commit
 
@@ -126,7 +126,45 @@ Execute uma única vez para instalar:
 npm run prepare
 ```
 
-## �🔗 Links Importantes
+## 💻 Ambiente de Desenvolvimento
+
+### Restrições de Admin (Importante!)
+
+Se você tem um **admin externo de empresa** com restrições:
+- ❌ Alguns scripts npm podem exigir permissões especiais
+- ❌ Instalação de packages via `npm install` pode travar
+- ⚠️ `npm audit fix --force` pode exigir um ambiente menos restrito
+
+**Solução:** Use o Node.js portátil (sem instalação):
+
+```powershell
+# Configure o PATH na sessão do PowerShell
+$env:PATH="C:\Users\Alanderson.Barros\OneDrive - SODEXO\Documentos\node-v24.12.0-win-x64\node-v24.12.0-win-x64;" + $env:PATH
+
+# Depois pode usar normalmente
+npm install
+npm run dev
+npm run build
+```
+
+⚠️ **Lembrete:** Em cada nova sessão de terminal, você precisa reexecutar o comando do PATH acima antes dos comandos npm.
+
+### Versões Atualizadas (11 de Janeiro)
+
+- **Vite:** Atualizado para **7.3.1** (via `npm audit fix --force`)
+- **esbuild:** Atualizado (dependência do Vite 7)
+- **react-router-dom:** Atualizado com fix de XSS
+- **Vulnerabilidades:** Reduzidas de 5 para 0 ✅
+- **Build:** Testado e funcionando (exit code 0)
+
+⚠️ Se notar algo diferente no `npm run dev` ou `npm run build` após esse upgrade, entre em contato. O Vite 7 é compatível com o projeto, mas qualquer comportamento inesperado deve ser reportado.
+
+### Commits de Segurança
+
+- **c8d9285** - "chore: npm audit fix router" (apenas fix seguro)
+- **007c1f6** - "chore: audit fix --force (vite 7)" (upgrade major de Vite)
+
+## 🔗 Links Importantes
 
 - **Código-Fonte:** https://github.com/cortanaautomatizar-hub/carbon-finance
 - **Vercel Project:** https://vercel.com/cortanas-projects-66cf4d9c/carbon-finance-vqbg
