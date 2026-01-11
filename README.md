@@ -2,13 +2,13 @@
 
 > Aplicação web moderna para gestão financeira pessoal com controle de cartões de crédito e transações
 
-[![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://carbon-finance-vqbg-e7dx4zno1-cortanas-projects-66cf4d9c.vercel.app)
+[![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://carbon-finance-vqbg.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18.3-61dafb.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6.svg)
 ![Vite](https://img.shields.io/badge/Vite-5.4-646cff.svg)
 
-**🌐 [Ver Demo ao Vivo](https://carbon-finance-vqbg-e7dx4zno1-cortanas-projects-66cf4d9c.vercel.app)**
+**🌐 [Ver Demo ao Vivo](https://carbon-finance-vqbg.vercel.app)**
 
 ---
 
