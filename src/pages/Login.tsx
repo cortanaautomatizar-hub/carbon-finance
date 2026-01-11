@@ -10,6 +10,16 @@ import authService from "@/services/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Logo } from "@/components/Logo";
 
+// Credenciais demo
+const DEMO_USER = {
+  id: 1,
+  name: "Demo User",
+  email: "demo@carbonfinance.com",
+  phone: "+55 11 99999-9999",
+};
+
+const DEMO_TOKEN = "demo_token_123456789";
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -20,6 +30,13 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
+      // Se os campos estiverem vazios, usar credenciais demo
+      if (!email && !password) {
+        auth.login(DEMO_USER, DEMO_TOKEN);
+        navigate("/");
+        return;
+      }
+
       const res = authService.login(email, password);
       auth.login(res.user, res.token);
       const from = (location.state as any)?.from?.pathname || "/";
