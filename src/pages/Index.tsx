@@ -14,6 +14,7 @@ import {
   Receipt,
   Fuel,
 } from "lucide-react";
+import { SpendingByCardChart } from "@/components/SpendingByCardChart";
 
 // Dados estáticos para as transações
 const transactions = [
@@ -122,6 +123,9 @@ export default function DashboardPage() {
           <p className="text-sm text-green-500 mt-1">↑12% no ano</p>
           <InvestmentChart />
         </Card>
+
+        {/* Card: Gastos por Cartão (Gráfico de Pizza) */}
+        <SpendingByCardChart />
 
         {/* Card: Últimas Transações */}
         <Card className="p-6 lg:col-span-2">
