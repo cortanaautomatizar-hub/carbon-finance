@@ -14,7 +14,7 @@ import {
   Receipt,
   Fuel,
 } from "lucide-react";
-import { SpendingByCardChart } from "@/components/SpendingByCardChart";
+import { GastosPorCategoriaChart } from "@/components/GastosPorCategoriaChart";
 
 // Dados estáticos para as transações
 const transactions = [
@@ -124,8 +124,8 @@ export default function DashboardPage() {
           <InvestmentChart />
         </Card>
 
-        {/* Card: Gastos por Cartão (Gráfico de Pizza) */}
-        <SpendingByCardChart />
+        {/* Card: Gastos por Categoria (Gráfico de Pizza) */}
+        <GastosPorCategoriaChart />
 
         {/* Card: Últimas Transações */}
         <Card className="p-6 lg:col-span-2">
