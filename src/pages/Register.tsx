@@ -34,7 +34,7 @@ const RegisterPage = () => {
       // normalize phone: remove non-digits and ensure leading +
       const raw = `${phoneCountry}${phoneArea}${phoneNumber}`.replace(/\D/g, "");
       const phone = raw ? `+${raw}` : undefined;
-      const res = authService.register({ name, email, phone, password });
+      const res = await authService.register({ name, email, phone, password });
       auth.login(res.user, res.token);
       navigate("/");
     } catch (e: any) {
