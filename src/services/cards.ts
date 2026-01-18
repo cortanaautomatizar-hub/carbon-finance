@@ -99,6 +99,18 @@ export const addTransaction = (cardId: number, tx: Omit<Transaction, "id">) => {
   card.transactions = [...(card.transactions ?? []), newTx];
   card.used = (card.used ?? 0) + newTx.amount;
   saveStorage(list);
+  // background sync to Supabase if available
+  if (hasSupabase()) {
+    const sb = getSupabase();
+    (async () => {
+      try {
+        // attempt to update full card payload
+        await sbUpdateCard(card.id, card);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }
   return newTx;
 };
 
@@ -108,6 +120,15 @@ export const removeTransaction = (cardId: number, txId: number) => {
   if (!card) return;
   card.transactions = (card.transactions ?? []).filter((t) => t.id !== txId);
   saveStorage(list);
+  if (hasSupabase()) {
+    (async () => {
+      try {
+        await sbUpdateCard(card.id, card);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }
 };
 
 export default { getAll, getById, create, update, remove, addTransaction, removeTransaction };
