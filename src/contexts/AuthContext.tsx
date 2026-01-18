@@ -71,8 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isInitialized) {
         const usedSupabase = await trySupabaseSession();
         if (!usedSupabase) {
-          // fallback: only auto-login demo in non-production
-          if (!token && !user && process.env.NODE_ENV !== "production") {
+          // fallback: auto-login demo in non-production or Vercel preview environments
+          const allowDemo = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'preview';
+          if (!token && !user && allowDemo) {
             setUser(DEMO_USER);
             setToken(DEMO_TOKEN);
             setCardsUserId(DEMO_USER.id!);
