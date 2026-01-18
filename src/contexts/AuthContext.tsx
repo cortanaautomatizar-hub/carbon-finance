@@ -135,7 +135,14 @@ export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children 
   const { token } = useAuth();
   const location = useLocation();
 
-  if (!token) return <Navigate to="/login" state={{ from: location }} replace />;
+  // Allow previews to view the app with the demo user even when no Supabase token
+  const isPreviewView = process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV !== 'production';
+  const { user } = useAuth();
+
+  if (!token) {
+    if (isPreviewView && user) return <>{children}</>;
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   return <>{children}</>;
 };
