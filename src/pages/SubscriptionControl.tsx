@@ -54,7 +54,7 @@ const categories = Object.keys(categoryColors);
 
 // --- COMPONENTE DO MODAL ---
 
-const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }) => {
+const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }: { open?: any; onOpenChange?: any; onAddSubscription?: any; initialData?: any; onSaveSubscription?: any }) => {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
@@ -231,7 +231,19 @@ export const SubscriptionControl = () => {
             }
             return newMap;
         });
-        setEditingSubscription(null);
+            // persist changes
+            try {
+                // persist subscription data (color is stored separately via serviceColors)
+                svcUpdateSubscription({ id: updated.id, name: updated.name, amount: updated.amount, category: updated.category, renewalDate: updated.renewalDate, status: updated.status ?? 'active', card: updated.card ?? 'Cartão final 8842' });
+                svcSetServiceColor(updated.name, updated.color);
+                const existing = subscriptions.find(s => s.id === updated.id);
+                if (existing && existing.name && existing.name !== updated.name) {
+                    svcRemoveServiceColor(existing.name);
+                }
+            } catch (e) {
+                // ignore persistence errors
+            }
+            setEditingSubscription(null);
     };
 
     const handleDeleteSubscription = (id) => {
