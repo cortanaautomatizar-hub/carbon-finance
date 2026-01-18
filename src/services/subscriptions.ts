@@ -1,6 +1,19 @@
 const STORAGE_KEY = 'carbon_finance_subscriptions';
 const COLORS_KEY = 'carbon_finance_serviceColors';
 
+import getSupabase from './supabase';
+
+const hasSupabase = () => !!getSupabase();
+
+const trySync = async (fn: () => Promise<any>) => {
+  try {
+    await fn();
+  } catch (e) {
+    // ignore sync errors (keep localStorage as source of truth for now)
+    // console.warn('Supabase sync failed', e);
+  }
+};
+
 type Subscription = {
   id: number;
   name: string;
@@ -54,6 +67,18 @@ export function addSubscription(payload: Omit<Subscription, 'id'>): Subscription
   const entry: Subscription = { id: newId, ...payload };
   subs.push(entry);
   saveSubscriptions(subs);
+  // attempt background sync to Supabase
+  if (hasSupabase()) {
+    const sb = getSupabase();
+    trySync(async () => {
+      // get current supabase user id (if available)
+      // @ts-ignore
+      const userResp = await sb.auth.getUser?.();
+      // @ts-ignore
+      const sbUser = userResp?.data?.user ?? null;
+      await sb.from('subscriptions').insert([{ payload: entry, auth_uid: sbUser?.id ?? null }]);
+    });
+  }
   return entry;
 }
 
@@ -63,6 +88,12 @@ export function updateSubscription(updated: Subscription): Subscription | null {
   if (idx === -1) return null;
   subs[idx] = { ...subs[idx], ...updated };
   saveSubscriptions(subs);
+  if (hasSupabase()) {
+    const sb = getSupabase();
+    trySync(async () => {
+      await sb.from('subscriptions').update({ payload: subs[idx] }).eq('id', updated.id);
+    });
+  }
   return subs[idx];
 }
 
@@ -72,6 +103,12 @@ export function removeSubscription(id: number): Subscription | null {
   if (idx === -1) return null;
   const [removed] = subs.splice(idx, 1);
   saveSubscriptions(subs);
+  if (hasSupabase()) {
+    const sb = getSupabase();
+    trySync(async () => {
+      await sb.from('subscriptions').delete().eq('id', id);
+    });
+  }
   return removed;
 }
 
