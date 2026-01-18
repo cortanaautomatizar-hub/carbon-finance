@@ -240,6 +240,48 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
+## Controle de Assinaturas
+
+Descrição rápida:
+
+- Gerencie serviços recorrentes: adicionar, editar, pausar/reativar e excluir assinaturas.
+- Estado persistido no `localStorage` (chave: `carbon_finance_subscriptions`) para uso em modo local/demo.
+
+Fluxo de uso (UI):
+
+- Clique em **Nova Assinatura** para adicionar um serviço (nome, valor, categoria, cor).
+- Em cada linha do serviço, abra o menu (•••) para **Pausar/Reativar**, **Editar** ou **Excluir**.
+- Ao editar, um modal pré-preenche os campos; salvando, os dados são atualizados e persistidos.
+- Excluir abre um diálogo de confirmação antes de remover.
+
+Validações principais:
+
+- `nome` é obrigatório.
+- `valor` deve ser numérico e maior que 0.
+- `categoria` deve ser selecionada.
+
+Comandos locais (se tiver Node):
+
+```bash
+# instalar dependências
+npm install
+
+# rodar em dev
+npm run dev
+
+# build de produção
+npm run build
+```
+
+Sem Node no PC (alternativas):
+
+- Use o modo demo (auto-login) disponível no app para testes rápidos sem backend.
+- Ou use Node portátil (veja `BASELINE.md`) ou GitHub Codespaces para desenvolvimento sem instalar localmente.
+
+Observações:
+
+- As alterações de assinaturas são salvas no `localStorage` do navegador; para limpar, remova a chave `carbon_finance_subscriptions` no DevTools -> Application.
+- Para trabalhar em equipe/produzir mudanças no repositório remoto, siga o fluxo seguro descrito em `BASELINE.md` (criar branch a partir do baseline estável, testar, abrir PR).
 
 
 # Anotações - Work
