@@ -285,3 +285,12 @@ Observações:
 
 
 # Anotações - Work
+
+**Status do fluxo (automação)**
+
+- Concluído — status:
+	- **Branch atual:** `feat/subscriptions-ui`.
+	- **Stashes restantes:** 2 (não apliquei o `stash pop` para evitar prompts).
+	- **Alterações:** não havia alterações não comitadas a enviar (já commitadas em `fbcf3af`).
+	- **Push:** `feat/subscriptions-ui` atualizado no remoto.
+
