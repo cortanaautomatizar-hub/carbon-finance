@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { setUserId as setCardsUserId } from "@/services/cards";
+import getSupabase from "@/services/supabase";
 
 type User = { id?: number; name?: string; email?: string; phone?: string };
 
@@ -37,15 +38,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auto-login na primeira inicialização se não houver sessão
   useEffect(() => {
-    if (!isInitialized && !token && !user) {
-      // Fazer auto-login com usuário demo
-      setUser(DEMO_USER);
-      setToken(DEMO_TOKEN);
-      setCardsUserId(DEMO_USER.id!);
-      setIsInitialized(true);
-    } else {
-      setIsInitialized(true);
-    }
+    const sb = getSupabase();
+
+    const trySupabaseSession = async () => {
+      if (!sb) return false;
+      try {
+        // attempt to get current session/user from Supabase
+        // supabase-js v2 exposes auth.getSession / auth.getUser
+        // best-effort without strict typing here
+        // @ts-ignore
+        const sessionResp = await sb.auth.getSession?.();
+        // @ts-ignore
+        const userResp = await sb.auth.getUser?.();
+
+        const sbUser = userResp?.data?.user ?? sessionResp?.data?.session?.user ?? null;
+        const accessToken = sessionResp?.data?.session?.access_token ?? null;
+
+        if (sbUser) {
+          const u: User = { id: Number(sbUser.id) || undefined, name: sbUser.user_metadata?.name ?? sbUser.email, email: sbUser.email };
+          setUser(u);
+          setToken(accessToken ?? null);
+          if (u.id) setCardsUserId(u.id as number);
+          return true;
+        }
+      } catch (e) {
+        // ignore and fallback
+      }
+      return false;
+    };
+
+    (async () => {
+      if (!isInitialized) {
+        const usedSupabase = await trySupabaseSession();
+        if (!usedSupabase) {
+          // fallback: only auto-login demo in non-production
+          if (!token && !user && process.env.NODE_ENV !== "production") {
+            setUser(DEMO_USER);
+            setToken(DEMO_TOKEN);
+            setCardsUserId(DEMO_USER.id!);
+          }
+        }
+        setIsInitialized(true);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -56,16 +91,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     else localStorage.removeItem("auth_user");
   }, [token, user]);
 
-  const login = (u: User, t: string) => {
-    setUser(u);
-    setToken(t);
-    // Isolar dados por usuário
-    if (u.id) {
-      setCardsUserId(u.id);
+  const login = async (u: User, t: string) => {
+    // If Supabase configured, rely on its auth flows; but also allow manual login
+    const sb = getSupabase();
+    if (sb && u.email && t === "supabase") {
+      // nothing to do: supabase session should be already set via its SDK
+    } else {
+      setUser(u);
+      setToken(t);
     }
+    if (u.id) setCardsUserId(u.id);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        // @ts-ignore
+        await sb.auth.signOut?.();
+      } catch (e) {
+        // ignore
+      }
+    }
     setUser(null);
     setToken(null);
     // Limpar userId ao fazer logout
