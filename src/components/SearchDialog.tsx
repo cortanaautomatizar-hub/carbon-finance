@@ -11,7 +11,8 @@ export const SearchDialog = ({ children }: { children?: React.ReactNode }) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (q.trim().length === 0) return;
-    navigate(`/search?q=${encodeURIComponent(q)}`);
+    // Navigate to the subscriptions page search for now
+    navigate(`/assinaturas?q=${encodeURIComponent(q)}`);
     setOpen(false);
   };
 
