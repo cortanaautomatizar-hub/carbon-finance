@@ -3,6 +3,8 @@ import { Bell, Search, User, Settings, LifeBuoy, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import SearchDialog from "@/components/SearchDialog";
+import NotificationsMenu from "@/components/NotificationsMenu";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -22,15 +24,19 @@ export const Header = () => {
 
       <div className="flex items-center gap-2">
         {/* Search */}
-        <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
-          <Search size={20} />
-        </button>
+        <SearchDialog>
+          <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
+            <Search size={20} />
+          </button>
+        </SearchDialog>
 
         {/* Notifications */}
-        <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all relative">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
-        </button>
+        <NotificationsMenu>
+          <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all relative">
+            <Bell size={20} />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+          </button>
+        </NotificationsMenu>
 
         {/* Profile Dropdown */}
         <DropdownMenu>
