@@ -130,5 +130,55 @@ git push -u origin feat/subscriptions-ui
 
 - Observações rápidas:
 	- Se houver conflitos ao `stash pop`, resolver, `git add` e `git commit`.
-	- Se o commit já existir em `main`, crie a branch a partir do commit atual: `git branch feat/subscriptions-ui` e abra PR a partir dela.
+ 	- Se o commit já existir em `main`, crie a branch a partir do commit atual: `git branch feat/subscriptions-ui` e abra PR a partir dela.
+
+## Supabase — Setup e migrações
+
+Adicionar o Supabase ao projeto (banco + Auth) envolve 3 passos principais: criar o projeto no painel Supabase, aplicar as migrações SQL e fornecer as chaves como variáveis de ambiente ao build/runtime.
+
+- 1) Criar projeto Supabase
+	- No painel Supabase, crie um novo projeto e anote o `Project URL` e a `anon public` key.
+
+- 2) Aplicar migrações
+	- Opção A — Console SQL (rápido): abra o SQL Editor do projeto e cole o conteúdo de `supabase/001_init.sql` e após aplicar cole `supabase/002_add_auth_uid_and_rls.sql` na ordem.
+	- Opção B — CLI / psql (quando você tiver a string de conexão):
+
+PowerShell exemplo (substitua <CONN> pela connection string do Postgres):
+```powershell
+psql "<CONN>" -f .\supabase\001_init.sql
+psql "<CONN>" -f .\supabase\002_add_auth_uid_and_rls.sql
+```
+
+	- Observação: a segunda migração habilita RLS nas tabelas e adiciona a coluna `auth_uid`. É necessário garantir que novas linhas tenham `auth_uid` preenchido — ou pelo cliente (nossa lib já adiciona `auth_uid` ao inserir) ou por um trigger no banco.
+
+- 3) Variáveis de ambiente
+	- Copie `.env.example` para `.env.local` (local) e preencha:
+
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+	- Em produção / Vercel, adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` nas Environment Variables do projeto.
+
+Notas importantes:
+- RLS: as policies em `002_add_auth_uid_and_rls.sql` verificam `auth_uid = auth.uid()` — clientes devem usar o Supabase Auth e a SDK para que o JWT seja enviado automaticamente nas requisições.
+- Populando `auth_uid`: o cliente já inclui `auth_uid` ao criar registros (veja `src/services/supabase.ts`). Se preferir, crie um trigger DB que preencha `auth_uid` a partir das claims do JWT.
+
+Exemplo básico (opcional) — preencher via trigger (AJUSTE conforme seu ambiente):
+```sql
+-- pseudo-exemplo: adapte conforme o formato das claims no seu Supabase
+create function public.set_auth_uid() returns trigger language plpgsql as $$
+begin
+	if new.auth_uid is null then
+		new.auth_uid := current_setting('request.jwt.claims', true);
+	end if;
+	return new;
+end;
+$$;
+
+create trigger set_auth_uid_before_insert before insert on cards for each row execute procedure public.set_auth_uid();
+```
+
+Se quiser, eu aplico as alterações de docs e o `.env.example` em um PR, ou posso executar comandos locais de migração se você me der a connection string (use com cuidado). 
 
