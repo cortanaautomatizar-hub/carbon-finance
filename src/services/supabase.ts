@@ -13,8 +13,6 @@ console.log("DEBUG SUPABASE:", {
 
 let supabase: SupabaseClient | null = null;
 
-let supabase: SupabaseClient | null = null;
-
 export const getSupabase = () => {
   if (!url || !key) return null;
   if (!supabase) supabase = createClient(url, key);
