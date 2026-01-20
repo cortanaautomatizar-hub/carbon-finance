@@ -6,6 +6,21 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 let supabase: SupabaseClient | null = null;
 
+// Custom errors to make error handling explicit
+export class SupabaseUnavailableError extends Error {
+  constructor(message = 'Supabase client is not configured') {
+    super(message);
+    this.name = 'SupabaseUnavailableError';
+  }
+}
+
+export class UserContextError extends Error {
+  constructor(message = 'User context is required') {
+    super(message);
+    this.name = 'UserContextError';
+  }
+}
+
 // Test helper: expose a setter only during tests via globalThis to avoid exporting test-only symbols
 // (Vitest runs with import.meta.env.MODE === 'test').
 if (import.meta.env.MODE === 'test') {
@@ -30,14 +45,14 @@ const getUserUid = async (sb: SupabaseClient): Promise<string | null> => {
 
 // Helpers for `cards` table updated to work with RLS + `auth_uid`.
 // Reads/Inserts will require a user context (either `userId` or an authenticated `auth_uid`).
-export const sbGetCards = async (userId?: number): Promise<CreditCardProps[] | null> => {
+export const sbGetCards = async (userId?: number): Promise<CreditCardProps[]> => {
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) throw new SupabaseUnavailableError();
   const uid = await getUserUid(sb);
 
   // Defensive: do not perform an unscoped read that could return all rows.
   if (!userId && !uid) {
-    throw new Error('Sem contexto de usuário para buscar cartões (forneça userId ou autentique o usuário)');
+    throw new UserContextError('Sem contexto de usuário para buscar cartões (forneça userId ou autentique o usuário)');
   }
 
   let query = sb.from('cards').select('*').order('id', { ascending: true });
@@ -52,14 +67,14 @@ export const sbGetCards = async (userId?: number): Promise<CreditCardProps[] | n
 export const sbCreateCard = async (
   userId: number | null,
   payload: Partial<CreditCardProps>
-): Promise<CreditCardProps | null> => {
+): Promise<CreditCardProps> => {
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) throw new SupabaseUnavailableError();
   const uid = await getUserUid(sb);
 
   // Require a user context for inserts to avoid orphan rows.
   if (!userId && !uid) {
-    throw new Error('Usuário não autenticado: não é possível criar cartão sem associação a um usuário');
+    throw new UserContextError('Usuário não autenticado: não é possível criar cartão sem associação a um usuário');
   }
 
   const row: any = { payload };
@@ -71,17 +86,17 @@ export const sbCreateCard = async (
   return data as CreditCardProps;
 };
 
-export const sbUpdateCard = async (cardId: number, updates: Partial<CreditCardProps>): Promise<CreditCardProps | null> => {
+export const sbUpdateCard = async (cardId: number, updates: Partial<CreditCardProps>): Promise<CreditCardProps> => {
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) throw new SupabaseUnavailableError();
   const { data, error } = await sb.from('cards').update({ payload: updates }).eq('id', cardId).select().single();
   if (error) throw error;
   return data as CreditCardProps;
 };
 
-export const sbDeleteCard = async (cardId: number): Promise<boolean | null> => {
+export const sbDeleteCard = async (cardId: number): Promise<boolean> => {
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) throw new SupabaseUnavailableError();
   const { error } = await sb.from('cards').delete().eq('id', cardId);
   if (error) throw error;
   return true;

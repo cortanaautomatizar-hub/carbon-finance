@@ -24,7 +24,17 @@ describe('supabase service defensive behavior', () => {
     };
     (globalThis as any).__setSupabaseClient(mockClient);
 
-    await expect(svc.sbCreateCard(null, { name: 'x' } as Partial<CreditCardProps>)).rejects.toThrow(/Usuário não autenticado/);
+    await expect(svc.sbCreateCard(null, { name: 'x' } as Partial<CreditCardProps>)).rejects.toBeInstanceOf(svc.UserContextError);
+  });
+
+  it('sbGetCards throws SupabaseUnavailableError when client not configured', async () => {
+    (globalThis as any).__setSupabaseClient(null);
+    await expect(svc.sbGetCards(1)).rejects.toBeInstanceOf(svc.SupabaseUnavailableError);
+  });
+
+  it('sbCreateCard throws SupabaseUnavailableError when client not configured', async () => {
+    (globalThis as any).__setSupabaseClient(null);
+    await expect(svc.sbCreateCard(1, { name: 'X' } as Partial<CreditCardProps>)).rejects.toBeInstanceOf(svc.SupabaseUnavailableError);
   });
 
   it('sbGetCards returns data when userId provided', async () => {
