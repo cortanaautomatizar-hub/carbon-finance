@@ -3,6 +3,16 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
+// --- LINHA DE DIAGNÓSTICO PARA TESTE ---
+console.log("DEBUG SUPABASE:", { 
+  urlDetectada: !!url, 
+  keyDetectada: !!key,
+  ambiente: import.meta.env.MODE 
+});
+// ---------------------------------------
+
+let supabase: SupabaseClient | null = null;
+
 let supabase: SupabaseClient | null = null;
 
 export const getSupabase = () => {
