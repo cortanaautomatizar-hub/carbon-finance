@@ -1,65 +1,81 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { CreditCardProps } from '@/components/CreditCard';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-// --- LINHA DE DIAGNÓSTICO PARA TESTE ---
-console.log("DEBUG SUPABASE:", { 
-  urlDetectada: !!url, 
-  keyDetectada: !!key,
-  ambiente: import.meta.env.MODE 
-});
-// ---------------------------------------
-
 let supabase: SupabaseClient | null = null;
 
-export const getSupabase = () => {
+export const __setSupabaseClient = (client: SupabaseClient | null) => {
+  supabase = client;
+};
+
+export const getSupabase = (): SupabaseClient | null => {
+  // If a client instance was injected (tests or runtime), return it first.
+  if (supabase) return supabase;
   if (!url || !key) return null;
-  if (!supabase) supabase = createClient(url, key);
+  supabase = createClient(url, key);
   return supabase;
 };
 
-const getUserUid = async (sb: SupabaseClient) => {
+const getUserUid = async (sb: SupabaseClient): Promise<string | null> => {
   const { data, error } = await sb.auth.getUser();
   if (error) throw error;
   return (data?.user?.id ?? null) as string | null;
 };
 
 // Helpers for `cards` table updated to work with RLS + `auth_uid`.
-// Inserts populate `auth_uid` from the authenticated user; reads use `auth_uid` when possible.
-export const sbGetCards = async (userId?: number) => {
+// Reads/Inserts will require a user context (either `userId` or an authenticated `auth_uid`).
+export const sbGetCards = async (userId?: number): Promise<CreditCardProps[] | null> => {
   const sb = getSupabase();
   if (!sb) return null;
   const uid = await getUserUid(sb);
-  let query: any = sb.from('cards').select('*').order('id', { ascending: true });
+
+  // Defensive: do not perform an unscoped read that could return all rows.
+  if (!userId && !uid) {
+    throw new Error('Sem contexto de usuário para buscar cartões (forneça userId ou autentique o usuário)');
+  }
+
+  let query = sb.from('cards').select('*').order('id', { ascending: true });
   if (userId) query = query.eq('user_id', userId);
-  else if (uid) query = query.eq('auth_uid', uid);
+  else query = query.eq('auth_uid', uid as string);
+
   const { data, error } = await query;
   if (error) throw error;
-  return data;
+  return data as CreditCardProps[];
 };
 
-export const sbCreateCard = async (userId: number | null, payload: any) => {
+export const sbCreateCard = async (
+  userId: number | null,
+  payload: Partial<CreditCardProps>
+): Promise<CreditCardProps | null> => {
   const sb = getSupabase();
   if (!sb) return null;
   const uid = await getUserUid(sb);
+
+  // Require a user context for inserts to avoid orphan rows.
+  if (!userId && !uid) {
+    throw new Error('Usuário não autenticado: não é possível criar cartão sem associação a um usuário');
+  }
+
   const row: any = { payload };
   if (userId) row.user_id = userId;
   if (uid) row.auth_uid = uid;
+
   const { data, error } = await sb.from('cards').insert([row]).select().single();
   if (error) throw error;
-  return data;
+  return data as CreditCardProps;
 };
 
-export const sbUpdateCard = async (cardId: number, updates: any) => {
+export const sbUpdateCard = async (cardId: number, updates: Partial<CreditCardProps>): Promise<CreditCardProps | null> => {
   const sb = getSupabase();
   if (!sb) return null;
   const { data, error } = await sb.from('cards').update({ payload: updates }).eq('id', cardId).select().single();
   if (error) throw error;
-  return data;
+  return data as CreditCardProps;
 };
 
-export const sbDeleteCard = async (cardId: number) => {
+export const sbDeleteCard = async (cardId: number): Promise<boolean | null> => {
   const sb = getSupabase();
   if (!sb) return null;
   const { error } = await sb.from('cards').delete().eq('id', cardId);
