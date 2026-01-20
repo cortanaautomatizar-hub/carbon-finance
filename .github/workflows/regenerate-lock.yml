@@ -1,0 +1,41 @@
+name: Regenerate package-lock
+
+on:
+  workflow_dispatch:
+
+jobs:
+  regen-lock:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Show Node/npm versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies (regenerate lock)
+        run: |
+          npm install
+
+      - name: Commit and push lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json package.json || true
+          if git diff --staged --quiet; then
+            echo "No changes to package-lock.json"
+          else
+            git commit -m "chore: regenerate package-lock via GitHub Action"
+            git push
+          fi

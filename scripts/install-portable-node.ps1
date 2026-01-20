@@ -45,9 +45,10 @@ if (-not (Test-Path (Join-Path $TargetDir 'node.exe'))) {
 $env:Path = "$TargetDir;$env:Path"
 
 # 8) Adicionar ao PATH do usuário (persistente)
-$userPath = [Environment]::GetEnvironmentVariable('PATH','User') ?? ''
+$userPath = [Environment]::GetEnvironmentVariable('PATH','User')
+if (-not $userPath) { $userPath = '' }
 if ($userPath -notlike "*$TargetDir*") {
-  $newUserPath = if ($userPath) { "$TargetDir;$userPath" } else { "$TargetDir" }
+  if ($userPath) { $newUserPath = "$TargetDir;$userPath" } else { $newUserPath = "$TargetDir" }
   [Environment]::SetEnvironmentVariable('PATH', $newUserPath, 'User')
   Write-Output "Adicionado $TargetDir ao PATH de usuário. Novos terminais passarão a ver o Node após reabrir."
 } else {

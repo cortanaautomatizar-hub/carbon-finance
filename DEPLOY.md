@@ -161,6 +161,8 @@ VITE_SUPABASE_ANON_KEY=
 
 	- Em produção / Vercel, adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` nas Environment Variables do projeto.
 
+Observação: este repositório inclui um workflow acionável (`Apply Vercel Env`) que permite que um admin aplique as variáveis via GitHub Actions (use o secret `VERCEL_TOKEN`). Veja `docs/ADMIN_SETUP.md` para instruções passo-a-passo.
+
 Notas importantes:
 - RLS: as policies em `002_add_auth_uid_and_rls.sql` verificam `auth_uid = auth.uid()` — clientes devem usar o Supabase Auth e a SDK para que o JWT seja enviado automaticamente nas requisições.
 - Populando `auth_uid`: o cliente já inclui `auth_uid` ao criar registros (veja `src/services/supabase.ts`). Se preferir, crie um trigger DB que preencha `auth_uid` a partir das claims do JWT.

@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      PGSSLMODE: require
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,9 +16,17 @@ jobs:
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
+      - name: Check psql version
+        run: psql --version
+
+      - name: Test DB connection (conninfo)
+        run: |
+          if [ -z "$DATABASE_URL" ]; then echo 'SUPABASE_DB_URL secret is not set'; exit 1; fi
+          PGSSLMODE=require psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\conninfo"
+
       - name: Show environment (debug)
         run: |-
-          echo "Running migrations against $DATABASE_URL"
+          echo "Running migrations... (DATABASE_URL is hidden for security)"
 
       - name: Apply 001_init.sql
         run: |
