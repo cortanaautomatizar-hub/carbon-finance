@@ -5,7 +5,7 @@ import type { CreditCardProps } from '@/components/CreditCard';
 describe('supabase service defensive behavior', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    svc.__setSupabaseClient(null);
+    (globalThis as any).__setSupabaseClient(null);
   });
 
   it('sbGetCards throws when no userId and no authenticated uid', async () => {
@@ -13,7 +13,7 @@ describe('supabase service defensive behavior', () => {
     const mockClient: any = {
       auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
     };
-    svc.__setSupabaseClient(mockClient);
+    (globalThis as any).__setSupabaseClient(mockClient);
 
     await expect(svc.sbGetCards()).rejects.toThrow(/Sem contexto de usuário/);
   });
@@ -22,7 +22,7 @@ describe('supabase service defensive behavior', () => {
     const mockClient: any = {
       auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
     };
-    svc.__setSupabaseClient(mockClient);
+    (globalThis as any).__setSupabaseClient(mockClient);
 
     await expect(svc.sbCreateCard(null, { name: 'x' } as Partial<CreditCardProps>)).rejects.toThrow(/Usuário não autenticado/);
   });
@@ -43,7 +43,7 @@ describe('supabase service defensive behavior', () => {
       })
     };
 
-    svc.__setSupabaseClient(mockClient);
+    (globalThis as any).__setSupabaseClient(mockClient);
 
     const res = await svc.sbGetCards(123);
     expect(res).toEqual(rows);
@@ -60,7 +60,7 @@ describe('supabase service defensive behavior', () => {
       })
     };
 
-    svc.__setSupabaseClient(mockClient);
+    (globalThis as any).__setSupabaseClient(mockClient);
 
     const res = await svc.sbCreateCard(1, { name: 'New' } as Partial<CreditCardProps>);
     expect(res).toEqual(created);

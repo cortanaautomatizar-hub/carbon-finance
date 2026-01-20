@@ -6,12 +6,16 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 let supabase: SupabaseClient | null = null;
 
-export const __setSupabaseClient = (client: SupabaseClient | null) => {
-  supabase = client;
-};
+// Test helper: expose a setter only during tests via globalThis to avoid exporting test-only symbols
+// (Vitest runs with import.meta.env.MODE === 'test').
+if (import.meta.env.MODE === 'test') {
+  (globalThis as any).__setSupabaseClient = (client: SupabaseClient | null) => {
+    supabase = client;
+  };
+}
 
 export const getSupabase = (): SupabaseClient | null => {
-  // If a client instance was injected (tests or runtime), return it first.
+  // If a client instance was injected (by global test helper), return it first.
   if (supabase) return supabase;
   if (!url || !key) return null;
   supabase = createClient(url, key);
