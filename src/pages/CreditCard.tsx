@@ -32,8 +32,8 @@ export default function CreditCardPage() {
         return () => api.off("select", handleSlideChange);
   }, [api, cards]);
 
-    const load = () => {
-        const list = cardsService.getAll();
+    const load = async () => {
+        const list = await cardsService.getAll();
         setCards(list);
         setSelectedCard((prev) => {
             if (!prev && list.length > 0) return list[0];
@@ -43,11 +43,11 @@ export default function CreditCardPage() {
     };
 
     useEffect(() => {
-        load();
+        void load();
     }, []);
 
-    const handleSaveCard = (newCardData: any) => {
-        const created = cardsService.create({
+    const handleSaveCard = async (newCardData: any) => {
+        const created = await cardsService.create({
             name: newCardData.name,
             number: newCardData.number,
             expiry: newCardData.expiry,
@@ -60,30 +60,33 @@ export default function CreditCardPage() {
             closingDay: newCardData.closingDay,
         } as any);
 
-        load();
-        setSelectedCard(created);
+        await load();
+        setSelectedCard(created as any);
         setIsCardFormOpen(false);
-        setTimeout(() => api?.scrollTo(cardsService.getAll().length - 1), 100);
+        setTimeout(async () => {
+            const list = await cardsService.getAll();
+            api?.scrollTo(list.length - 1);
+        }, 100);
     };
   
-    const handleRemoveCard = (id: number) => {
-        cardsService.remove(id);
-        load();
+    const handleRemoveCard = async (id: number) => {
+        await cardsService.remove(id);
+        await load();
         api?.scrollTo(0);
     };
 
-    const handleSaveTransaction = (newTransactionData: Omit<Transaction, 'id'>) => {
+    const handleSaveTransaction = async (newTransactionData: Omit<Transaction, 'id'>) => {
         if (!selectedCard) return;
-        cardsService.addTransaction(selectedCard.id, newTransactionData);
-        load();
+        await cardsService.addTransaction(selectedCard.id, newTransactionData);
+        await load();
         setIsTransactionFormOpen(false);
     };
 
-    const handlePayInvoice = () => {
+    const handlePayInvoice = async () => {
         if (!selectedCard || selectedCard.invoice.total === 0) return;
 
         // Build updated invoice
-        const card = cardsService.getById(selectedCard.id);
+        const card = await cardsService.getById(selectedCard.id);
         if (!card) return;
         const newHistoryEntry = {
             month: new Date().toLocaleString('default', { month: 'long' }) + ' ' + new Date().getFullYear(),

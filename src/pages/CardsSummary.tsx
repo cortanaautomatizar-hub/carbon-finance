@@ -19,20 +19,20 @@ const CardsSummary = () => {
   const [cards, setCards] = useState<CreditCardProps[]>([]);
   const [isCardFormOpen, setIsCardFormOpen] = useState(false);
 
-  const load = () => setCards(cardsService.getAll());
+  const load = async () => setCards(await cardsService.getAll());
 
   useEffect(() => {
-    load();
+    void load();
   }, []);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('Remover este cartão?')) return;
-    cardsService.remove(id);
-    load();
+    await cardsService.remove(id);
+    await load();
   };
 
-  const handleSaveCard = (newCardData: any) => {
-    const created = cardsService.create({
+  const handleSaveCard = async (newCardData: any) => {
+    await cardsService.create({
       name: newCardData.name,
       number: newCardData.number,
       expiry: newCardData.expiry,
@@ -45,7 +45,7 @@ const CardsSummary = () => {
       closingDay: newCardData.closingDay,
     } as any);
 
-    load();
+    await load();
     setIsCardFormOpen(false);
   };
 
