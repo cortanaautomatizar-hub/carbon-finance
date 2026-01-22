@@ -1,0 +1,26 @@
+name: Force Redeploy
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  force-redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true # allows pushing with GITHUB_TOKEN
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create empty commit and push
+        run: |
+          git commit --allow-empty -m "chore: trigger redeploy from workflow" || echo "No-op: commit already exists"
+          git push
+
+      - name: Post status
+        run: echo "Empty commit pushed — redeploy should be triggered on your hosting provider (Vercel)."
