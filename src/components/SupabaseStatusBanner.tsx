@@ -25,7 +25,7 @@ export const SupabaseStatusBanner: React.FC = () => {
         // If Supabase returns an error due to RLS / auth, we consider it auth_error
         if (res.error) {
           // supabase-js returns error with status
-          const statusCode = (res.error as any)?.status;
+          const statusCode = (res.error as { status?: number })?.status;
           if (statusCode === 401 || statusCode === 403) setStatus('auth_error');
           else setStatus('error');
         } else {

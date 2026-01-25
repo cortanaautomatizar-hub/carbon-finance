@@ -37,8 +37,9 @@ const RegisterPage = () => {
       const res = await authService.register({ name, email, phone, password });
       auth.login(res.user, res.token);
       navigate("/");
-    } catch (e: any) {
-      toast({ title: 'Erro no cadastro', description: e.message || 'Falha ao cadastrar' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: 'Erro no cadastro', description: msg || 'Falha ao cadastrar' });
     }
   };
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { calcularSaldoConsolidado } from '@/lib/saldoConsolidado';
+import { calcularSaldoConsolidado, Transacao } from '@/lib/saldoConsolidado';
 
 /**
  * Hook profissional para calcular o saldo consolidado do usuário.
@@ -7,12 +7,12 @@ import { calcularSaldoConsolidado } from '@/lib/saldoConsolidado';
  */
 export function useSaldoConsolidado(transacoes: Array<{ amount: number }>) {
   const resultado = useMemo(() => {
-    const transacoesFormatadas = transacoes.map((t) => ({
+    const transacoesFormatadas: Transacao[] = transacoes.map((t) => ({
       tipo: t.amount >= 0 ? 'entrada' : 'saida',
       valor: Math.abs(t.amount),
     }));
 
-    return calcularSaldoConsolidado(transacoesFormatadas as any);
+    return calcularSaldoConsolidado(transacoesFormatadas);
   }, [transacoes]);
 
   return resultado;

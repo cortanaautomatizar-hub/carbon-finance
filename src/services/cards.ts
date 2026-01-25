@@ -37,7 +37,7 @@ export const getAll = async (): Promise<CreditCardProps[]> => {
   if (hasSupabase() && currentUserId) {
     try {
       const data = await sbGetCards(currentUserId);
-      if (data) return data as any;
+      if (data) return data as CreditCardProps[];
     } catch (e) {
       // fallback to local
     }

@@ -1,7 +1,7 @@
 
 import { Bell, Search, User, Settings, LifeBuoy, LogOut } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useTranslation, LocaleKey } from '@/hooks/useTranslation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,7 +37,7 @@ export const Header = () => {
 
         {/* Language selector */}
         <div className="w-28">
-          <Select value={locale} onValueChange={(v) => setLocale(v as any)}>
+          <Select value={locale} onValueChange={(v) => setLocale(v as LocaleKey)}>
             <SelectTrigger className="w-full h-10 text-sm">
               <SelectValue />
             </SelectTrigger>

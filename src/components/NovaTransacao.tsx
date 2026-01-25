@@ -62,8 +62,9 @@ export default function NovaTransacao() {
       // Reset e fechar apenas após sucesso
       reset();
       setOpen(false);
-    } catch (e: any) {
-      toast({ title: 'Erro', description: e?.message || 'Não foi possível adicionar a transação.', variant: 'destructive' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: 'Erro', description: msg || 'Não foi possível adicionar a transação.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }

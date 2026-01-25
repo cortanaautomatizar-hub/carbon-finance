@@ -28,7 +28,9 @@ const FormSchema = z.object({
     textColor: z.string().min(4, { message: "A cor do texto deve ser um hexadecimal válido." }),
 });
 
-export function NewCreditCardForm({ onSave }: { onSave: (data: any) => void }) {
+import type { CreditCardProps } from '@/components/CreditCard';
+
+export function NewCreditCardForm({ onSave }: { onSave: (data: Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & { invoice?: CreditCardProps['invoice'] }) => void }) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {

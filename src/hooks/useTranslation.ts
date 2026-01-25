@@ -15,17 +15,20 @@ export function useTranslation() {
   });
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, locale); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, locale); } catch (e) { /* ignore storage errors */ }
   }, [locale]);
 
   const t = (path: string) => {
     const parts = path.split('.');
-    let cur: any = (locales as any)[locale];
+    let cur: unknown = (locales as Record<string, unknown>)[locale];
     for (const p of parts) {
-      cur = cur?.[p];
-      if (cur === undefined) return path;
+      if (typeof cur === 'object' && cur !== null && p in (cur as Record<string, unknown>)) {
+        cur = (cur as Record<string, unknown>)[p];
+      } else {
+        return path;
+      }
     }
-    return cur as string;
+    return typeof cur === 'string' ? cur : path;
   };
 
   return { t, locale, setLocale } as const;

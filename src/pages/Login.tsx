@@ -39,10 +39,12 @@ const LoginPage = () => {
 
       const res = await authService.login(email, password);
       auth.login(res.user, res.token);
-      const from = (location.state as any)?.from?.pathname || "/";
+      type LoginState = { from?: { pathname?: string } } | null;
+      const from = ((location.state as unknown as LoginState)?.from?.pathname) || "/";
       navigate(from);
-    } catch (e: any) {
-      toast({ title: 'Erro no login', description: e.message || 'Falha ao autenticar' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: 'Erro no login', description: msg || 'Falha ao autenticar' });
     }
   };
 

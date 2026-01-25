@@ -43,14 +43,19 @@ export function useTransactions() {
 
       if (error) throw error;
 
-      // Defensive: ensure amounts are numbers
-      const normalized = (data ?? []).map((r: any) => ({
-        ...r,
-        amount: typeof r.amount === 'string' ? parseFloat(r.amount) : r.amount ?? 0,
+      // Defensive: ensure amounts are numbers and pick expected fields
+      const normalized = (data ?? []).map((r: Record<string, unknown>) => ({
+        id: typeof r['id'] === 'number' ? (r['id'] as number) : 0,
+        name: typeof r['name'] === 'string' ? (r['name'] as string) : undefined,
+        amount: typeof r['amount'] === 'string' ? parseFloat(r['amount'] as string) : typeof r['amount'] === 'number' ? (r['amount'] as number) : 0,
+        type: typeof r['type'] === 'string' && (r['type'] === 'income' || r['type'] === 'outcome') ? (r['type'] as 'income' | 'outcome') : undefined,
+        category: typeof r['category'] === 'string' ? (r['category'] as string) : undefined,
+        date: typeof r['date'] === 'string' ? (r['date'] as string) : undefined,
+        description: typeof r['description'] === 'string' ? (r['description'] as string) : undefined,
       })) as TransactionRecord[];
 
       setTransactions(normalized);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e instanceof Error ? e : new Error(String(e)));
     } finally {
       setLoading(false);

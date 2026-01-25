@@ -23,7 +23,7 @@ const FormSchema = z.object({
     category: z.enum(["alimentação", "transporte", "saúde", "diversão", "educação", "compras", "outros"]).optional(),
 });
 
-export function NewTransactionForm({ onSave, onDone }: { onSave: (data: any) => void, onDone?: () => void }) {
+export function NewTransactionForm({ onSave, onDone }: { onSave: (data: { description: string; amount: number; date: string; category?: string }) => void, onDone?: () => void }) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         mode: 'onChange',

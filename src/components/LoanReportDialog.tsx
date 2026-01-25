@@ -62,7 +62,7 @@ export const LoanReportDialog = () => {
         <div className="space-y-5 py-4">
           <div className="space-y-2">
             <Label htmlFor="report-type">Tipo de Relatório</Label>
-            <Select value={options.type} onValueChange={(value) => setOptions({ ...options, type: value as any })}>
+            <Select value={options.type} onValueChange={(value) => setOptions({ ...options, type: value as ReportOptions['type'] })}>
               <SelectTrigger id="report-type">
                 <SelectValue />
               </SelectTrigger>
@@ -78,7 +78,7 @@ export const LoanReportDialog = () => {
 
           <div className="space-y-2">
             <Label htmlFor="period">Período</Label>
-            <Select value={options.period} onValueChange={(value) => setOptions({ ...options, period: value as any })}>
+            <Select value={options.period} onValueChange={(value) => setOptions({ ...options, period: value as ReportOptions['period'] })}>
               <SelectTrigger id="period">
                 <SelectValue />
               </SelectTrigger>
@@ -94,7 +94,7 @@ export const LoanReportDialog = () => {
 
           <div className="space-y-2">
             <Label htmlFor="format">Formato de Download</Label>
-            <Select value={options.format} onValueChange={(value) => setOptions({ ...options, format: value as any })}>
+            <Select value={options.format} onValueChange={(value) => setOptions({ ...options, format: value as ReportOptions['format'] })}>
               <SelectTrigger id="format">
                 <SelectValue />
               </SelectTrigger>
