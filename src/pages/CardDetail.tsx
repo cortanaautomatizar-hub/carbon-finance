@@ -27,8 +27,8 @@ export default function CardDetail() {
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [notificationsShown, setNotificationsShown] = useState(false);
 
-  const load = () => {
-    const found = id ? cardsService.getById(Number(id)) : undefined;
+  const load = async () => {
+    const found = id ? await cardsService.getById(Number(id)) : undefined;
     if (!found) {
       setCard(null);
       return;
@@ -37,7 +37,7 @@ export default function CardDetail() {
   };
 
   useEffect(() => {
-    load();
+    void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -56,29 +56,29 @@ export default function CardDetail() {
     );
   }
 
-  const handleAddTransaction = (data: Omit<Transaction, 'id'>) => {
-    cardsService.addTransaction(card.id, data);
-    load();
+  const handleAddTransaction = async (data: Omit<Transaction, 'id'>) => {
+    await cardsService.addTransaction(card.id, data);
+    await load();
   };
 
-  const handleRemoveTransaction = (txId: number) => {
+  const handleRemoveTransaction = async (txId: number) => {
     if (!confirm('Remover esta transação?')) return;
-    cardsService.removeTransaction(card.id, txId);
-    load();
+    await cardsService.removeTransaction(card.id, txId);
+    await load();
     toast({ title: 'Transação removida' });
   };
 
-  const handleBudgetUpdate = (budget: number) => {
+  const handleBudgetUpdate = async (budget: number) => {
     const updated: CreditCardProps = {
       ...card,
       monthlyBudget: budget,
     } as CreditCardProps;
-    cardsService.update(card.id, updated);
-    load();
+    await cardsService.update(card.id, updated);
+    await load();
     toast({ title: `Meta de gastos atualizada para R$ ${budget.toFixed(2)}` });
   };
 
-  const handlePayInvoice = () => {
+  const handlePayInvoice = async () => {
     if (card.invoice.total === 0) return;
     const newHistoryEntry = {
       month: new Date().toLocaleString('default', { month: 'long' }) + ' ' + new Date().getFullYear(),
@@ -91,8 +91,8 @@ export default function CardDetail() {
       transactions: [],
       invoice: { ...card.invoice, total: 0, history: [...card.invoice.history, newHistoryEntry] },
     } as CreditCardProps;
-    cardsService.update(card.id, updated);
-    load();
+    await cardsService.update(card.id, updated);
+    await load();
     toast({ title: 'Fatura paga com sucesso!' });
   };
 

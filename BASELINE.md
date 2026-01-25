@@ -198,6 +198,50 @@ Token: demo_token_123456789
 
 ⚠️ **Nota:** Este modo é ideal para demos e desenvolvimento. Para produção real, desabilite o auto-login no `AuthContext.tsx`.
 
+## ✅ Checklist QA — Controle de Assinaturas
+
+Use esta checklist antes de enviar alterações relacionadas a assinaturas para o repositório remoto e para validar deploys em staging:
+
+1. Ambiente
+   - Abra a aplicação em modo dev (`npm run dev`) ou use o modo Demo (auto-login) se não houver Node local.
+   - Abra DevTools → Application → `Local Storage` para observar a chave `carbon_finance_subscriptions` e `carbon_finance_serviceColors`.
+
+2. Fluxos principais (manuais)
+   - Adicionar: Clique em **Nova Assinatura**, preencha `nome`, `valor`, `categoria` e `cor` e confirme. Verifique:
+     - A nova assinatura aparece na lista.
+     - `localStorage` contém o novo item.
+     - Toast de sucesso é exibido.
+   - Editar: No menu do serviço → **Editar**, altere campos e salve. Verifique:
+     - Os valores da linha são atualizados imediatamente.
+     - `serviceColors` é atualizado (se o nome mudou, o mapa reflete a nova chave).
+     - Toast de confirmação é exibido.
+   - Pausar / Reativar: Use o menu → **Pausar/Reativar**. Verifique:
+     - Status visual (Badge) muda entre `Ativa` e `Pausada`.
+     - Total mensal (`TOTAL MENSAL`) é recalculado corretamente.
+     - Toast de status é exibido.
+   - Excluir: Menu → **Excluir** → confirmar no diálogo. Verifique:
+     - Item é removido da lista.
+     - `localStorage` não contém mais o item.
+     - Toast de exclusão (variant `destructive`) aparece.
+
+3. Validação e UX
+   - Tente submeter o modal com `nome` vazio → deve mostrar mensagem inline e foco no campo.
+   - Informe `valor` = 0 ou texto inválido → mensagem inline e foco no campo de valor.
+   - Não selecione `categoria` → mensagem inline e foco no seletor.
+
+4. Recovery / Baseline
+   - Se encontrar comportamento incorreto após alterações, restaure o baseline estável localmente ou peça a um colaborador com Git disponível para executar:
+     ```bash
+     git reset --hard f5efe5f
+     git push -f
+     ```
+   - No Vercel, verifique o deployment estável (`5sLtHnnhT`) e, se necessário, promova manualmente ou desabilite deploys automáticos para produção.
+
+5. Limpeza
+   - Para testes repetidos, remova a chave `carbon_finance_subscriptions` em DevTools → Application → Local Storage, ou use o modo incognito.
+
+Observação: a persistência atual usa `localStorage` (MVP). Para produção, extraia a lógica para um serviço/API e adicione autenticação/controle de acesso.
+
 ## 📊 Dashboard - Novas Funcionalidades
 
 ### Gráfico de Gastos por Categoria

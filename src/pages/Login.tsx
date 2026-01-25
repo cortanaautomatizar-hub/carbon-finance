@@ -37,7 +37,7 @@ const LoginPage = () => {
         return;
       }
 
-      const res = authService.login(email, password);
+      const res = await authService.login(email, password);
       auth.login(res.user, res.token);
       const from = (location.state as any)?.from?.pathname || "/";
       navigate(from);

@@ -1,15 +1,16 @@
 import { CreditCardProps, Transaction } from "@/components/CreditCard";
 import { cards as initialCards } from "@/data/cards";
+import { getSupabase, sbGetCards, sbCreateCard, sbUpdateCard, sbDeleteCard } from "./supabase";
 
 let currentUserId: number | null = null;
+
+export const setUserId = (userId: number | null) => {
+  currentUserId = userId;
+};
 
 const getStorageKey = (): string => {
   if (!currentUserId) throw new Error("userId não está definido");
   return `cards_data_v1_user_${currentUserId}`;
-};
-
-export const setUserId = (userId: number | null) => {
-  currentUserId = userId;
 };
 
 const loadStorage = (): CreditCardProps[] => {
@@ -30,15 +31,29 @@ const saveStorage = (data: CreditCardProps[]) => {
   }
 };
 
-export const getAll = (): CreditCardProps[] => {
+const hasSupabase = () => !!getSupabase();
+
+export const getAll = async (): Promise<CreditCardProps[]> => {
+  if (hasSupabase() && currentUserId) {
+    try {
+      const data = await sbGetCards(currentUserId);
+      if (data) return data as any;
+    } catch (e) {
+      // fallback to local
+    }
+  }
   return loadStorage();
 };
 
-export const getById = (id: number): CreditCardProps | undefined => {
-  return loadStorage().find((c) => c.id === id);
+export const getById = async (id: number): Promise<CreditCardProps | undefined> => {
+  const list = await getAll();
+  return list.find((c) => c.id === id);
 };
 
-export const create = (card: Omit<CreditCardProps, "id" | "transactions" | "invoice"> & { invoice?: CreditCardProps["invoice"] }) => {
+export const create = async (card: Omit<CreditCardProps, "id" | "transactions" | "invoice"> & { invoice?: CreditCardProps["invoice"] }) => {
+  if (hasSupabase() && currentUserId) {
+    return await sbCreateCard(currentUserId, card);
+  }
   const list = loadStorage();
   const id = list.reduce((m, c) => Math.max(m, c.id), 0) + 1;
   const newCard: CreditCardProps = {
@@ -54,7 +69,10 @@ export const create = (card: Omit<CreditCardProps, "id" | "transactions" | "invo
   return newCard;
 };
 
-export const update = (id: number, updates: Partial<CreditCardProps>) => {
+export const update = async (id: number, updates: Partial<CreditCardProps>) => {
+  if (hasSupabase()) {
+    return await sbUpdateCard(id, updates);
+  }
   const list = loadStorage();
   const idx = list.findIndex((c) => c.id === id);
   if (idx === -1) return null;
@@ -63,7 +81,10 @@ export const update = (id: number, updates: Partial<CreditCardProps>) => {
   return list[idx];
 };
 
-export const remove = (id: number) => {
+export const remove = async (id: number) => {
+  if (hasSupabase()) {
+    return await sbDeleteCard(id);
+  }
   let list = loadStorage();
   list = list.filter((c) => c.id !== id);
   saveStorage(list);
@@ -78,6 +99,18 @@ export const addTransaction = (cardId: number, tx: Omit<Transaction, "id">) => {
   card.transactions = [...(card.transactions ?? []), newTx];
   card.used = (card.used ?? 0) + newTx.amount;
   saveStorage(list);
+  // background sync to Supabase if available
+  if (hasSupabase()) {
+    const sb = getSupabase();
+    (async () => {
+      try {
+        // attempt to update full card payload
+        await sbUpdateCard(card.id, card);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }
   return newTx;
 };
 
@@ -87,6 +120,15 @@ export const removeTransaction = (cardId: number, txId: number) => {
   if (!card) return;
   card.transactions = (card.transactions ?? []).filter((t) => t.id !== txId);
   saveStorage(list);
+  if (hasSupabase()) {
+    (async () => {
+      try {
+        await sbUpdateCard(card.id, card);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }
 };
 
 export default { getAll, getById, create, update, remove, addTransaction, removeTransaction };

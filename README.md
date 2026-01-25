@@ -218,6 +218,39 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+---
+
+## Supabase — Migrations e RLS
+
+Incluí migrations em `supabase/` para facilitar a criação das tabelas e políticas.
+
+- `supabase/001_init.sql` — cria tabelas `users`, `cards`, `subscriptions` (campos `payload jsonb`).
+- `supabase/002_add_auth_uid_and_rls.sql` — adiciona `auth_uid` e habilita Row Level Security (RLS), além de policies exemplo que limitam acesso às linhas pelo `auth.uid()`.
+
+Passos para aplicar (CLI):
+
+```bash
+# instalar supabase CLI globalmente (uma vez)
+npm install -g supabase
+
+# autenticar
+supabase login
+
+# inicializar vínculo ao seu projeto (ex.: supabase link --project-ref <project-ref>)
+
+# aplicar migrations (push das migrations locais)
+supabase db push
+
+# ou executar SQL diretamente (útil para políticas específicas)
+supabase sql --file supabase/001_init.sql
+supabase sql --file supabase/002_add_auth_uid_and_rls.sql
+```
+
+Observações:
+- A policy de RLS exige que `auth_uid` seja preenchido ao inserir registros. Ao usar Supabase Auth, você deve gravar `auth.uid()` no campo `auth_uid` (via frontend ou função do banco) ao criar um recurso.
+- Teste primeiro em um projeto Supabase de desenvolvimento/staging antes de aplicar em produção.
+
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -240,6 +273,57 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
+## Controle de Assinaturas
+
+Descrição rápida:
+
+- Gerencie serviços recorrentes: adicionar, editar, pausar/reativar e excluir assinaturas.
+- Estado persistido no `localStorage` (chave: `carbon_finance_subscriptions`) para uso em modo local/demo.
+
+Fluxo de uso (UI):
+
+- Clique em **Nova Assinatura** para adicionar um serviço (nome, valor, categoria, cor).
+- Em cada linha do serviço, abra o menu (•••) para **Pausar/Reativar**, **Editar** ou **Excluir**.
+- Ao editar, um modal pré-preenche os campos; salvando, os dados são atualizados e persistidos.
+- Excluir abre um diálogo de confirmação antes de remover.
+
+Validações principais:
+
+- `nome` é obrigatório.
+- `valor` deve ser numérico e maior que 0.
+- `categoria` deve ser selecionada.
+
+Comandos locais (se tiver Node):
+
+```bash
+# instalar dependências
+npm install
+
+# rodar em dev
+npm run dev
+
+# build de produção
+npm run build
+```
+
+Sem Node no PC (alternativas):
+
+- Use o modo demo (auto-login) disponível no app para testes rápidos sem backend.
+- Ou use Node portátil (veja `BASELINE.md`) ou GitHub Codespaces para desenvolvimento sem instalar localmente.
+
+Observações:
+
+- As alterações de assinaturas são salvas no `localStorage` do navegador; para limpar, remova a chave `carbon_finance_subscriptions` no DevTools -> Application.
+- Para trabalhar em equipe/produzir mudanças no repositório remoto, siga o fluxo seguro descrito em `BASELINE.md` (criar branch a partir do baseline estável, testar, abrir PR).
 
 
 # Anotações - Work
+
+**Status do fluxo (automação)**
+
+- Concluído — status:
+	- **Branch atual:** `feat/subscriptions-ui`.
+	- **Stashes restantes:** 2 (não apliquei o `stash pop` para evitar prompts).
+	- **Alterações:** não havia alterações não comitadas a enviar (já commitadas em `fbcf3af`).
+	- **Push:** `feat/subscriptions-ui` atualizado no remoto.
+

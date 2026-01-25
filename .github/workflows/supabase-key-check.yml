@@ -1,0 +1,40 @@
+name: Supabase Key Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-supabase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate secrets are present
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then echo "Missing SUPABASE_URL secret" && exit 1; fi
+          if [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then echo "Missing SUPABASE_ANON_KEY secret" && exit 1; fi
+
+      - name: Test Supabase SELECT on `cards` table
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Testing ${SUPABASE_URL}/rest/v1/cards?select=id&limit=1"
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -H "apikey: ${SUPABASE_ANON_KEY}" -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" "${SUPABASE_URL}/rest/v1/cards?select=id&limit=1")
+          echo "HTTP_STATUS=${HTTP_STATUS}"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "SUCCESS: Supabase is responding (200). Response body:";
+            cat response.json || true
+            exit 0
+          else
+            echo "FAIL: status $HTTP_STATUS";
+            echo "Response body:";
+            cat response.json || true
+            exit 1
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: rm -f response.json || true

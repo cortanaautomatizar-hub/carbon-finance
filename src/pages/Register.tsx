@@ -29,12 +29,12 @@ const RegisterPage = () => {
     { iso: 'GB', name: 'Reino Unido', dial: '44', tw: '1f1ec-1f1e7' },
   ];
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     try {
       // normalize phone: remove non-digits and ensure leading +
       const raw = `${phoneCountry}${phoneArea}${phoneNumber}`.replace(/\D/g, "");
       const phone = raw ? `+${raw}` : undefined;
-      const res = authService.register({ name, email, phone, password });
+      const res = await authService.register({ name, email, phone, password });
       auth.login(res.user, res.token);
       navigate("/");
     } catch (e: any) {

@@ -1,0 +1,74 @@
+name: Apply Vercel Env
+
+on:
+  workflow_dispatch:
+    inputs:
+      VITE_SUPABASE_URL:
+        description: '(Optional) VITE_SUPABASE_URL to set'
+        required: false
+      VITE_SUPABASE_ANON_KEY:
+        description: '(Optional) VITE_SUPABASE_ANON_KEY to set'
+        required: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG: cortanas-projects-66cf4d9c
+      VERCEL_PROJECT: carbon-finance
+    steps:
+      - name: Validate inputs
+        run: |
+          echo "Inputs: VITE_SUPABASE_URL='${{ github.event.inputs.VITE_SUPABASE_URL }}' VITE_SUPABASE_ANON_KEY='${{ github.event.inputs.VITE_SUPABASE_ANON_KEY }}'"
+          if [[ -z "${{ secrets.VERCEL_TOKEN }}" ]]; then
+            echo "Error: secret VERCEL_TOKEN is not set on the repository. Ask an admin to add it under Settings → Secrets → Actions." >&2
+            exit 1
+          fi
+          if [[ -z "${{ github.event.inputs.VITE_SUPABASE_URL }}" && -z "${{ github.event.inputs.VITE_SUPABASE_ANON_KEY }}" ]]; then
+            echo "Warning: No inputs passed. You can pass values when triggering the workflow, or the workflow can be re-run with inputs." >&2
+          fi
+      - name: Get project id
+        id: get_project
+        run: |
+          set -euo pipefail
+          TOKEN="${{ secrets.VERCEL_TOKEN }}"
+          ORG="${{ env.VERCEL_ORG }}"
+          PROJECT="${{ env.VERCEL_PROJECT }}"
+          echo "Fetching project id for $ORG/$PROJECT"
+          resp=$(curl -s -H "Authorization: Bearer $TOKEN" "https://api.vercel.com/v9/projects/$ORG/$PROJECT")
+          echo "resp=$resp" > resp.json
+          pid=$(echo "$resp" | jq -r '.id // empty')
+          if [[ -z "$pid" ]]; then
+            echo "Failed to obtain project id: $(cat resp.json)" >&2
+            exit 1
+          fi
+          echo "project_id=$pid" >> $GITHUB_OUTPUT
+      - name: Set envs (create or replace)
+        run: |
+          set -euo pipefail
+          TOKEN="${{ secrets.VERCEL_TOKEN }}"
+          PID="${{ steps.get_project.outputs.project_id }}"
+          URL_INPUT='${{ github.event.inputs.VITE_SUPABASE_URL }}'
+          KEY_INPUT='${{ github.event.inputs.VITE_SUPABASE_ANON_KEY }}'
+
+          function add_or_replace() {
+            key="$1"; value="$2";
+            # List existing envs
+            exists=$(curl -s -H "Authorization: Bearer $TOKEN" "https://api.vercel.com/v9/projects/$PID/env" | jq -r ".[] | select(.key==\"$key\") | .id" )
+            if [[ -n "$exists" ]]; then
+              echo "Removing existing $key (id=$exists)"
+              curl -s -X DELETE -H "Authorization: Bearer $TOKEN" "https://api.vercel.com/v9/projects/$PID/env/$exists"
+            fi
+            body=$(jq -n --arg key "$key" --arg value "$value" '{key:$key,value:$value,target:["preview","production"],type:"encrypted"}')
+            echo "Adding $key"
+            curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d "$body" "https://api.vercel.com/v9/projects/$PID/env"
+          }
+
+          if [[ -n "$URL_INPUT" ]]; then
+            add_or_replace "VITE_SUPABASE_URL" "$URL_INPUT"
+          fi
+          if [[ -n "$KEY_INPUT" ]]; then
+            add_or_replace "VITE_SUPABASE_ANON_KEY" "$KEY_INPUT"
+          fi
+      - name: Done
+        run: echo "Environment variables updated. Please trigger a redeploy in Vercel if needed."

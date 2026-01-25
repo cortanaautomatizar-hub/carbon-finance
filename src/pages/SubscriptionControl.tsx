@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { subscriptions as initialSubscriptions } from "@/data/subscriptions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { add, format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from '@/components/ui/use-toast';
+import { getAllSubscriptions, getServiceColors, addSubscription as svcAddSubscription, updateSubscription as svcUpdateSubscription, removeSubscription as svcRemoveSubscription, setServiceColor as svcSetServiceColor, removeServiceColor as svcRemoveServiceColor } from '@/services/subscriptions';
 
 // --- DADOS E FUNÇÕES AUXILIARES ---
 
@@ -52,16 +54,70 @@ const categories = Object.keys(categoryColors);
 
 // --- COMPONENTE DO MODAL ---
 
-const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
+const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }: { open?: any; onOpenChange?: any; onAddSubscription?: any; initialData?: any; onSaveSubscription?: any }) => {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
     const [color, setColor] = useState("#71717A");
+    const [renewalDate, setRenewalDate] = useState(""); // format YYYY-MM-DD for input
+    const [errors, setErrors] = useState({ name: '', amount: '', category: '', renewalDate: '' });
+    const nameRef = useRef<HTMLInputElement | null>(null);
+    const amountRef = useRef<HTMLInputElement | null>(null);
+    const categoryTriggerId = useRef(`select-trigger-${Math.random().toString(36).slice(2,9)}`);
 
     const presetColors = ["#E50914", "#1DB954", "#00A8E1", "#F26722", "#FF0000", "#3b5998", "#1da1f2", "#c71610", "#000000", "#71717A"];
 
+    useEffect(() => {
+        if (initialData) {
+            setName(initialData.name || "");
+            setAmount(initialData.amount != null ? String(initialData.amount) : "");
+            setCategory(initialData.category || "");
+            setColor(initialData.color || "#71717A");
+            try {
+                setRenewalDate(initialData.renewalDate ? format(parseISO(initialData.renewalDate), 'yyyy-MM-dd') : format(add(today, { days: 30 }), 'yyyy-MM-dd'));
+            } catch {
+                setRenewalDate(format(add(today, { days: 30 }), 'yyyy-MM-dd'));
+            }
+        } else {
+            setName(""); setAmount(""); setCategory(""); setColor("#71717A");
+            setRenewalDate(format(add(today, { days: 30 }), 'yyyy-MM-dd'));
+        }
+        setErrors({ name: '', amount: '', category: '', renewalDate: '' });
+        // focus when modal opens
+        if (open) {
+            setTimeout(() => {
+                try { nameRef.current?.focus(); } catch {}
+            }, 50);
+        }
+    }, [initialData, open]);
+
     const handleSubmit = () => {
-        onAddSubscription({ name, amount: parseFloat(amount), category, color });
+        const parsed = parseFloat(amount);
+        const nextErrors = { name: '', amount: '', category: '', renewalDate: '' };
+        if (!name || !name.trim()) nextErrors.name = 'Nome é obrigatório.';
+        if (isNaN(parsed) || parsed <= 0) nextErrors.amount = 'Informe um valor maior que 0.';
+        if (!category) nextErrors.category = 'Selecione uma categoria.';
+        if (!renewalDate) nextErrors.renewalDate = 'Informe a data de renovação.';
+        // validate date >= today
+        if (renewalDate) {
+            const picked = new Date(renewalDate + 'T00:00:00');
+            const t = new Date(); t.setHours(0,0,0,0);
+            if (picked < t) nextErrors.renewalDate = 'A data deve ser hoje ou futura.';
+        }
+        setErrors(nextErrors);
+        // focus first invalid
+        if (nextErrors.name) { nameRef.current?.focus(); return; }
+        if (nextErrors.amount) { amountRef.current?.focus(); return; }
+        if (nextErrors.category) { const el = document.getElementById(categoryTriggerId.current); if (el) el.focus(); return; }
+        if (nextErrors.renewalDate) { const el = document.getElementById('renewal-date-input'); if (el) (el as HTMLInputElement).focus(); return; }
+
+        const isoDate = new Date(renewalDate + 'T00:00:00').toISOString();
+        const payload = { name, amount: parsed, category, color, renewalDate: isoDate };
+        if (onSaveSubscription && initialData && initialData.id != null) {
+            onSaveSubscription({ id: initialData.id, ...payload });
+        } else if (onAddSubscription) {
+            onAddSubscription(payload);
+        }
     };
 
     return (
@@ -71,23 +127,26 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
                     <DialogTitle>Nova Assinatura</DialogTitle>
                     <DialogDescription>Preencha os detalhes do novo serviço.</DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-6 py-4">
+                    <div className="grid gap-6 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right">Serviço</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                        <Input id="name" ref={nameRef} value={name} onChange={(e) => setName(e.target.value)} className={`col-span-3 ${errors.name ? 'ring-1 ring-red-500' : ''}`} aria-invalid={!!errors.name} />
+                        {errors.name && <p className="col-span-3 text-sm text-red-500 mt-1 pl-4">{errors.name}</p>}
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="amount" className="text-right">Valor (R$)</Label>
-                        <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="col-span-3" />
+                        <Input id="amount" ref={amountRef} type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className={`col-span-3 ${errors.amount ? 'ring-1 ring-red-500' : ''}`} aria-invalid={!!errors.amount} />
+                        {errors.amount && <p className="col-span-3 text-sm text-red-500 mt-1 pl-4">{errors.amount}</p>}
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="category" className="text-right">Categoria</Label>
                         <Select onValueChange={setCategory} value={category}>
-                            <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                            <SelectTrigger id={categoryTriggerId.current} className={`col-span-3 ${errors.category ? 'ring-1 ring-red-500' : ''}`} aria-invalid={!!errors.category}><SelectValue placeholder="Selecione..." /></SelectTrigger>
                             <SelectContent>
                                 {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                             </SelectContent>
                         </Select>
+                        {errors.category && <p className="col-span-3 text-sm text-red-500 mt-1 pl-4">{errors.category}</p>}
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Cor</Label>
@@ -98,9 +157,14 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
                             <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-24" placeholder="#121212" />
                         </div>
                     </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewal-date-input" className="text-right">Data de Renovação</Label>
+                        <Input id="renewal-date-input" type="date" value={renewalDate} onChange={(e) => setRenewalDate(e.target.value)} className={`col-span-3 ${errors.renewalDate ? 'ring-1 ring-red-500' : ''}`} aria-invalid={!!errors.renewalDate} />
+                        {errors.renewalDate && <p className="col-span-3 text-sm text-red-500 mt-1 pl-4">{errors.renewalDate}</p>}
+                    </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleSubmit}>Adicionar Assinatura</Button>
+                    <Button onClick={handleSubmit}>{initialData ? 'Salvar Alterações' : 'Adicionar Assinatura'}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -111,19 +175,23 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription }) => {
 // --- COMPONENTE PRINCIPAL DA PÁGINA ---
 
 export const SubscriptionControl = () => {
-    const [subscriptions, setSubscriptions] = useState(initialEnhancedSubscriptions);
-    const [serviceColors, setServiceColors] = useState(initialServiceColors);
+    const [subscriptions, setSubscriptions] = useState(() => {
+        const s = getAllSubscriptions();
+        return s && s.length > 0 ? s : initialEnhancedSubscriptions;
+    });
+    const [serviceColors, setServiceColors] = useState(() => {
+        const c = getServiceColors();
+        return c && Object.keys(c).length > 0 ? c : initialServiceColors;
+    });
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [sortOrder, setSortOrder] = useState("renewalDate");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingSubscription, setEditingSubscription] = useState(null);
 
     const handleAddSubscription = (newSub) => {
-        const newId = subscriptions.length > 0 ? Math.max(...subscriptions.map(s => s.id)) + 1 : 1;
-        
         const finalNewSub = {
-            id: newId,
             name: newSub.name,
             amount: newSub.amount,
             category: newSub.category,
@@ -132,9 +200,81 @@ export const SubscriptionControl = () => {
             card: 'Cartão final 8842'
         };
 
-        setSubscriptions(prevSubs => [...prevSubs, finalNewSub]);
-        setServiceColors(prevColors => ({ ...prevColors, [newSub.name]: newSub.color }));
+        const saved = svcAddSubscription(finalNewSub);
+        setSubscriptions(prev => [...prev, saved]);
+        svcSetServiceColor(saved.name, newSub.color);
+        setServiceColors(prev => ({ ...prev, [saved.name]: newSub.color }));
         setIsModalOpen(false);
+        try { toast({ title: 'Assinatura adicionada', description: `${saved.name} foi adicionada.` }); } catch {}
+    };
+
+    const handleToggleStatus = (id) => {
+        setSubscriptions(prev => {
+            const next = prev.map(s => s.id === id ? { ...s, status: s.status === 'active' ? 'paused' : 'active' } : s);
+            const changed = next.find(s => s.id === id);
+            // persist
+            if (changed) svcUpdateSubscription(changed);
+            try { toast({ title: changed.status === 'active' ? 'Assinatura reativada' : 'Assinatura pausada', description: `${changed.name}` }); } catch {}
+            return next;
+        });
+    };
+
+    const handleSaveSubscription = (updated) => {
+        setSubscriptions(prev => prev.map(s => s.id === updated.id ? { ...s, name: updated.name, amount: updated.amount, category: updated.category, color: updated.color, renewalDate: updated.renewalDate } : s));
+        // update colors mapping, remove old key if name changed
+        setServiceColors(prev => {
+            const old = prev;
+            const existing = subscriptions.find(s => s.id === updated.id);
+            const newMap = { ...old, [updated.name]: updated.color };
+            if (existing && existing.name && existing.name !== updated.name) {
+                delete newMap[existing.name];
+            }
+            return newMap;
+        });
+            // persist changes
+            try {
+                // persist subscription data (color is stored separately via serviceColors)
+                svcUpdateSubscription({ id: updated.id, name: updated.name, amount: updated.amount, category: updated.category, renewalDate: updated.renewalDate, status: updated.status ?? 'active', card: updated.card ?? 'Cartão final 8842' });
+                svcSetServiceColor(updated.name, updated.color);
+                const existing = subscriptions.find(s => s.id === updated.id);
+                if (existing && existing.name && existing.name !== updated.name) {
+                    svcRemoveServiceColor(existing.name);
+                }
+            } catch (e) {
+                // ignore persistence errors
+            }
+            setEditingSubscription(null);
+    };
+
+    const handleDeleteSubscription = (id) => {
+        const sub = subscriptions.find(s => s.id === id);
+        const name = sub ? sub.name : 'assinatura';
+        const removed = svcRemoveSubscription(id);
+        // if removed, also remove color mapping
+        if (removed && serviceColors[removed.name]) {
+            svcRemoveServiceColor(removed.name);
+            setServiceColors(prev => {
+                const next = { ...prev };
+                delete next[removed.name];
+                return next;
+            });
+        }
+        setSubscriptions(prev => prev.filter(s => s.id !== id));
+        try { toast({ title: 'Assinatura excluída', description: `${name} foi removida.`, variant: 'destructive' }); } catch {}
+    };
+
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    // persist subscriptions and serviceColors to localStorage
+    // persistence handled by service functions called in handlers
+
+    const confirmDelete = () => {
+        if (deleteTarget) {
+            handleDeleteSubscription(deleteTarget.id);
+            setDeleteTarget(null);
+        }
+        setIsDeleteOpen(false);
     };
 
     const filteredSubscriptions = useMemo(() => {
@@ -158,6 +298,20 @@ export const SubscriptionControl = () => {
     return (
         <div className="space-y-8">
             <AddSubscriptionModal open={isModalOpen} onOpenChange={setIsModalOpen} onAddSubscription={handleAddSubscription} />
+            <AddSubscriptionModal open={Boolean(editingSubscription)} onOpenChange={(v) => { if (!v) setEditingSubscription(null); }} initialData={editingSubscription} onSaveSubscription={handleSaveSubscription} />
+
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmar Exclusão</DialogTitle>
+                        <DialogDescription>Tem certeza que deseja excluir esta assinatura? Esta ação não pode ser desfeita.</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button variant="outline" onClick={() => { setIsDeleteOpen(false); setDeleteTarget(null); }}>Cancelar</Button>
+                        <Button className="bg-red-500 text-white" onClick={confirmDelete}>Excluir</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
             
             <div>
                 <div className="flex justify-between items-start mb-8">
@@ -218,9 +372,9 @@ export const SubscriptionControl = () => {
                                             <td className="py-4 px-4 text-right"><DropdownMenu>
                                                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="w-5 h-5" /></Button></DropdownMenuTrigger>
                                                     <DropdownMenuContent>
-                                                        <DropdownMenuItem>{sub.status === 'active' ? <><PauseCircle className="mr-2 h-4 w-4" />Pausar</> : <><PlayCircle className="mr-2 h-4 w-4" />Reativar</>}</DropdownMenuItem>
-                                                        <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-400"><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleToggleStatus(sub.id)}>{sub.status === 'active' ? <><PauseCircle className="mr-2 h-4 w-4" />Pausar</> : <><PlayCircle className="mr-2 h-4 w-4" />Reativar</>}</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => setEditingSubscription({ ...sub, color: serviceColors[sub.name] || serviceColors.Default })}><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-400" onClick={() => { setDeleteTarget(sub); setIsDeleteOpen(true); }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu></td>
                                         </tr>);})}</tbody>

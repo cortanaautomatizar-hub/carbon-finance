@@ -1,3 +1,5 @@
+import getSupabase from './supabase';
+
 export interface UserRecord {
   id: number;
   name: string;
@@ -18,7 +20,6 @@ const loadUsers = (): UserRecord[] => {
 };
 
 const getDefaultUsers = (): UserRecord[] => {
-  // Usuário padrão para testes
   return [
     {
       id: 1,
@@ -38,28 +39,46 @@ const saveUsers = (users: UserRecord[]) => {
 
 const generateToken = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
-export const register = (payload: { name: string; email: string; phone?: string; password: string }) => {
+export const register = async (payload: { name: string; email: string; phone?: string; password: string }) => {
+  const sb = getSupabase();
+  if (sb) {
+    // Use Supabase signUp flow
+    // @ts-ignore
+    const { data, error } = await sb.auth.signUp({ email: payload.email, password: payload.password, options: { data: { name: payload.name, phone: payload.phone } } });
+    if (error) throw error;
+    const sbUser = data?.user ?? null;
+    return { user: { id: sbUser?.id ?? null, name: payload.name, email: payload.email, phone: payload.phone }, token: null };
+  }
+
   const users = loadUsers();
   const exists = users.find(u => u.email === payload.email || (payload.phone && u.phone === payload.phone));
   if (exists) throw new Error('Usuário já cadastrado com esse e-mail/telefone');
-
-  // Encontrar o maior ID existente
   const maxId = users.reduce((m, u) => Math.max(m, u.id), 0);
   const id = maxId + 1;
   const user: UserRecord = { id, ...payload } as UserRecord;
   users.push(user);
   saveUsers(users);
-
   const token = generateToken();
   return { user: { id: user.id, name: user.name, email: user.email, phone: user.phone }, token };
 };
 
-export const login = (identifier: string, password: string) => {
+export const login = async (identifier: string, password: string) => {
+  const sb = getSupabase();
+  if (sb) {
+    // use Supabase sign-in
+    // @ts-ignore
+    const { data, error } = await sb.auth.signInWithPassword({ email: identifier, password });
+    if (error) throw error;
+    const session = data?.session ?? null;
+    const sbUser = session?.user ?? data?.user ?? null;
+    const token = session?.access_token ?? null;
+    return { user: { id: sbUser?.id ?? null, name: sbUser?.user_metadata?.name ?? sbUser?.email, email: sbUser?.email, phone: sbUser?.user_metadata?.phone }, token };
+  }
+
   const users = loadUsers();
   const user = users.find(u => u.email === identifier || u.phone === identifier);
   if (!user) throw new Error('Usuário não encontrado');
   if (user.password !== password) throw new Error('Senha inválida');
-
   const token = generateToken();
   return { user: { id: user.id, name: user.name, email: user.email, phone: user.phone }, token };
 };
