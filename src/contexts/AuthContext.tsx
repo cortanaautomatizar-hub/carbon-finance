@@ -38,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auto-login na primeira inicialização se não houver sessão
   useEffect(() => {
+    if (isInitialized) return;
     const sb = getSupabase();
 
     const trySupabaseSession = async () => {
@@ -46,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // attempt to get current session/user from Supabase
         // supabase-js v2 exposes auth.getSession / auth.getUser
         // best-effort without strict typing here
-        // @ts-ignore
+        // @ts-expect-error -- supabase auth typing may vary across versions
         const sessionResp = await sb.auth.getSession?.();
-        // @ts-ignore
+        // @ts-expect-error -- supabase auth typing may vary across versions
         const userResp = await sb.auth.getUser?.();
 
         const sbUser = userResp?.data?.user ?? sessionResp?.data?.session?.user ?? null;
@@ -62,27 +63,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return true;
         }
       } catch (e) {
-        // ignore and fallback
+        console.debug('Supabase session check failed', e);
       }
       return false;
     };
 
     (async () => {
-      if (!isInitialized) {
-        const usedSupabase = await trySupabaseSession();
-        if (!usedSupabase) {
-          // fallback: auto-login demo in non-production or Vercel preview environments
-          const allowDemo = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'preview';
-          if (!token && !user && allowDemo) {
-            setUser(DEMO_USER);
-            setToken(DEMO_TOKEN);
-            setCardsUserId(DEMO_USER.id!);
-          }
+      const usedSupabase = await trySupabaseSession();
+      if (!usedSupabase) {
+        // fallback: auto-login demo in non-production or Vercel preview environments
+        const allowDemo = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'preview';
+        if (!token && !user && allowDemo) {
+          setUser(DEMO_USER);
+          setToken(DEMO_TOKEN);
+          setCardsUserId(DEMO_USER.id!);
         }
-        setIsInitialized(true);
       }
+      setIsInitialized(true);
     })();
-  }, []);
+  }, [isInitialized, token, user]);
 
   useEffect(() => {
     if (token) localStorage.setItem("auth_token", token);
@@ -108,10 +107,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const sb = getSupabase();
     if (sb) {
       try {
-        // @ts-ignore
+        // @ts-expect-error -- supabase auth typing may vary across versions
         await sb.auth.signOut?.();
       } catch (e) {
-        // ignore
+        console.debug('signOut failed', e);
       }
     }
     setUser(null);

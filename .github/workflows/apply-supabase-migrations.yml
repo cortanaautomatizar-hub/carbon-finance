@@ -37,5 +37,9 @@ jobs:
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/002_add_auth_uid_and_rls.sql
 
+      - name: Apply 003_create_transactions.sql
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/003_create_transactions.sql
+
       - name: Done
         run: echo 'Supabase migrations applied.'
