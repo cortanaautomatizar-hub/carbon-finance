@@ -14,35 +14,17 @@ import {
   Receipt,
   Fuel,
 } from "lucide-react";
+import NovaTransacao from '@/components/NovaTransacao';
 import { GastosPorCategoriaChart } from "@/components/GastosPorCategoriaChart";
+import { formatarMoedaBRL } from "@/lib/saldoConsolidado";
+import { useSaldoConsolidado } from "@/hooks/useSaldoConsolidado";
+import { cards } from "@/data/cards";
+import { investments } from "@/data/investments";
 
-// Dados estáticos para as transações
-const transactions = [
-  {
-    icon: <ShoppingCart size={20} className="text-gray-400" />,
-    name: "Supermercado Silva",
-    description: "Compra no débito • Hoje, 14:30",
-    amount: -342.50,
-  },
-  {
-    icon: <DollarSign size={20} className="text-gray-400" />,
-    name: "Salário Mensal",
-    description: "Pix Recebido • Ontem",
-    amount: 4500.00,
-  },
-  {
-    icon: <Receipt size={20} className="text-gray-400" />,
-    name: "Netflix",
-    description: "Assinatura • 02 Out",
-    amount: -55.90,
-  },
-  {
-    icon: <Fuel size={20} className="text-gray-400" />,
-    name: "Posto Shell",
-    description: "Crédito • 01 Out",
-    amount: -120.00,
-  },
-];
+import { useTransactions } from '@/contexts/TransactionsContext';
+
+// NOTE: Transactions are now provided by TransactionsContext
+
 
 const InvestmentChart = () => (
     <svg viewBox="0 0 100 30" className="w-full h-auto mt-2">
@@ -56,6 +38,19 @@ const InvestmentChart = () => (
   );
 
 export default function DashboardPage() {
+  const { transactions } = useTransactions();
+  const saldo = useSaldoConsolidado(transactions);
+
+  const faturaTotal = cards.reduce((s, c) => s + ((c.invoice && c.invoice.total) ? c.invoice.total : 0), 0);
+  const investmentsTotal = investments.reduce((s, i) => s + (i.balance || 0), 0);
+  const avgInvestChange = investments.length ? (investments.reduce((s, i) => s + i.rentability, 0) / investments.length) : 0;
+
+  // Limites de cartão (soma de todos os cartões)
+  const totalLimit = cards.reduce((s, c) => s + (c.limit || 0), 0);
+  const totalUsed = cards.reduce((s, c) => s + (c.used || 0), 0);
+  const usedPercent = totalLimit ? Math.round((totalUsed / totalLimit) * 100) : 0;
+  const totalAvailable = totalLimit - totalUsed;
+
   return (
     <div className="space-y-8">
       <div>
@@ -65,20 +60,21 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Card: Saldo em Conta */}
+        {/* Card: Saldo Consolidado (calculado) */}
         <Card className="p-6 flex flex-col justify-between lg:col-span-1">
           <div>
             <div className="flex justify-between items-center text-muted-foreground mb-2">
               <div className="flex items-center gap-2">
                 <div className="bg-primary/15 p-2 rounded-lg">
-                  <Landmark size={16} className="text-primary" />
+                  <DollarSign size={16} className="text-primary" />
                 </div>
-                <span className="font-medium text-sm uppercase tracking-wider">SALDO EM CONTA</span>
+                <span className="font-medium text-sm uppercase tracking-wider">SALDO CONSOLIDADO</span>
               </div>
               <ArrowRight size={16} />
             </div>
-            <h2 className="text-3xl font-semibold">R$ 12.450,00</h2>
-            <p className="text-sm text-green-500 mt-1">+ R$ 1.200,00 últimos 7 dias</p>
+            {/* Saldo calculado via hook */}
+            <h2 className="text-3xl font-semibold">{saldo.saldoFormatado}</h2>
+            <p className="text-sm text-muted-foreground mt-1">Entradas: {formatarMoedaBRL(saldo.totalEntradas)} • Saídas: {formatarMoedaBRL(saldo.totalSaidas)}</p>
           </div>
           <Button className="w-full mt-6">
             Ver Extrato
@@ -96,15 +92,15 @@ export default function DashboardPage() {
             </div>
             <ArrowRight size={16} />
           </div>
-          <h2 className="text-3xl font-semibold">R$ 3.200,00</h2>
+          <h2 className="text-3xl font-semibold">{formatarMoedaBRL(faturaTotal)}</h2>
           <p className="text-sm text-muted-foreground mt-1">Fechamento em 10 OUT</p>
           <div className="mt-4">
               <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
                   <span>Limite utilizado</span>
-                  <span>65%</span>
+                  <span>{usedPercent}%</span>
               </div>
-            <Progress value={65} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-1">Disponível: R$ 1.800,00</p>
+            <Progress value={usedPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-1">Disponível: {formatarMoedaBRL(totalAvailable)}</p>
           </div>
         </Card>
 
@@ -119,8 +115,8 @@ export default function DashboardPage() {
             </div>
             <ArrowRight size={16} />
           </div>
-          <h2 className="text-3xl font-semibold">R$ 45.000,00</h2>
-          <p className="text-sm text-green-500 mt-1">↑12% no ano</p>
+          <h2 className="text-3xl font-semibold">{formatarMoedaBRL(investmentsTotal)}</h2>
+          <p className="text-sm text-green-500 mt-1">{avgInvestChange >= 0 ? '↑' : '↓'}{avgInvestChange.toFixed(2)}% no ano</p>
           <InvestmentChart />
         </Card>
 
@@ -131,25 +127,40 @@ export default function DashboardPage() {
         <Card className="p-6 lg:col-span-2">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Últimas transações</h3>
-                <Button variant="link" className="text-primary">Ver tudo</Button>
+                <div className="flex items-center gap-2">
+                  <NovaTransacao />
+                  <Button variant="link" className="text-primary">Ver tudo</Button>
+                </div>
             </div>
             <div className="flex flex-col gap-4">
-                {transactions.map((transaction, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                {transactions.map((transaction) => {
+                    const getIcon = () => {
+                      switch (transaction.category) {
+                        case 'Salário': return <DollarSign size={20} className="text-gray-400" />;
+                        case 'Alimentação': return <ShoppingCart size={20} className="text-gray-400" />;
+                        case 'Assinatura': return <Receipt size={20} className="text-gray-400" />;
+                        case 'Transporte': return <Fuel size={20} className="text-gray-400" />;
+                        default: return <ShoppingCart size={20} className="text-gray-400" />;
+                      }
+                    };
+
+                    return (
+                      <div key={transaction.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="bg-accent p-2 rounded-full">
-                                {transaction.icon}
+                                {getIcon()}
                             </div>
                             <div>
                                 <p className="font-semibold">{transaction.name}</p>
                                 <p className="text-sm text-muted-foreground">{transaction.description}</p>
                             </div>
                         </div>
-                        <p className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : ''}`}>
-                            {transaction.amount > 0 ? `+ R$ ${transaction.amount.toFixed(2)}` : `- R$ ${Math.abs(transaction.amount).toFixed(2)}`}
+                        <p className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-destructive'}`}>
+                            {transaction.amount > 0 ? `+ ${formatarMoedaBRL(transaction.amount)}` : `- ${formatarMoedaBRL(Math.abs(transaction.amount))}`}
                         </p>
-                    </div>
-                ))}
+                      </div>
+                    );
+                })}
             </div>
         </Card>
 

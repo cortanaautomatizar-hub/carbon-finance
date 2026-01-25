@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDown, ArrowUp, ChevronDown, Eye, Flag, Plus, RefreshCw, Star } from "lucide-react";
+import { investments } from "@/data/investments";
+import { formatarMoedaBRL } from "@/lib/saldoConsolidado";
 
 // TradingView Widget Component
 const TradingViewWidget = memo(() => {
@@ -61,12 +63,9 @@ const assetAllocation = [
   { name: "Outros", value: 5, color: "bg-gray-400" },
 ];
 
-const myProducts = [
-  { icon: "CDB", type: "CDB Carbon Pós-Fixado", category: "Renda Fixa", balance: "R$ 45.200,00", rentability: "+1.12%", expiry: "12/12/2025" },
-  { icon: "FCT", type: "Fundo Carbon Tech", category: "Multimercado", balance: "R$ 22.150,00", rentability: "+3.45%", expiry: "D+30" },
-  { icon: "TS", type: "Tesouro Selic 2027", category: "Tesouro Direto", balance: "R$ 15.000,00", rentability: "+0.98%", expiry: "01/03/2027" },
-  { icon: "P", type: "PETR4", category: "Ações", balance: "R$ 8.430,00", rentability: "-1.20%", expiry: "-" },
-];
+// Usando dados compartilhados de investimentos (src/data/investments.ts)
+// Cada item tem: { id, name, category, balance: number, rentability: number }
+
 
 const evolutionData = [
     { month: "Jan", value: 40 },
@@ -84,6 +83,9 @@ const recentActivity = [
 ];
 
 const Investments = () => {
+  const totalBalance = investments.reduce((s, p) => s + p.balance, 0);
+  const totalRend = investments.reduce((s, p) => s + p.balance * (p.rentability / 100), 0);
+
   return (
     <div className="space-y-8">
       <div>
@@ -108,8 +110,8 @@ const Investments = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-semibold">R$ 154.230,00</p>
-              <p className="text-muted-foreground text-sm">Rendimento total: + R$ 3.420,12</p>
+              <p className="text-4xl font-semibold">{formatarMoedaBRL(totalBalance)}</p>
+              <p className="text-muted-foreground text-sm">Rendimento total: {totalRend >= 0 ? '+' : '-'}{formatarMoedaBRL(Math.abs(totalRend))}</p>
               <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                 {assetAllocation.map((asset) => (
                   <div key={asset.name}>
@@ -187,20 +189,20 @@ const Investments = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {myProducts.map(prod => (
-                                    <TableRow key={prod.type} className="border-gray-700">
+                                {investments.map(prod => (
+                                    <TableRow key={prod.id} className="border-gray-700">
                                         <TableCell>
                                             <div className="flex items-center">
-                                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center mr-3 text-xs font-bold">{prod.icon}</div>
+                                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center mr-3 text-xs font-bold">{prod.name.split(' ')[0].slice(0,2).toUpperCase()}</div>
                                                 <div>
-                                                    <p className="font-bold">{prod.type}</p>
+                                                    <p className="font-bold">{prod.name}</p>
                                                     <p className="text-xs text-gray-400">{prod.category}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="font-semibold">{prod.balance}</TableCell>
-                                        <TableCell className={`${prod.rentability.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>{prod.rentability}</TableCell>
-                                        <TableCell>{prod.expiry}</TableCell>
+                                        <TableCell className="font-semibold">{formatarMoedaBRL(prod.balance)}</TableCell>
+                                        <TableCell className={`${prod.rentability >= 0 ? 'text-green-500' : 'text-red-500'}`}>{prod.rentability >= 0 ? `+${prod.rentability}%` : `${prod.rentability}%`}</TableCell>
+                                        <TableCell>{/* sem vencimento padrão */}-</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

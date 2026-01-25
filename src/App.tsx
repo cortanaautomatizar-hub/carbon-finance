@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { AuthProvider, RequireAuth } from "@/contexts/AuthContext";
+import { TransactionsProvider } from "@/contexts/TransactionsContext";
 import Index from "./pages/Index";
 import CreditCardPage from "./pages/CreditCard";
 import CardDetail from "./pages/CardDetail";
@@ -30,8 +31,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+        <TransactionsProvider>
+          <BrowserRouter>
+            <Routes>
             {/* Rotas sem o layout principal */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/cadastro" element={<RegisterPage />} />
@@ -54,6 +56,7 @@ const App = () => (
             </Route>
           </Routes>
         </BrowserRouter>
+        </TransactionsProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
