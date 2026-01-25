@@ -29,6 +29,7 @@ interface NavItemProps {
 const NavItem = ({ icon, label, active, onClick }: NavItemProps) => (
   <button
     onClick={onClick}
+    aria-current={active ? 'page' : undefined}
     className={cn(
       "flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-all duration-200 text-left",
       active 
@@ -79,30 +80,36 @@ export const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <NavItem
-            key={item.label}
-            icon={item.icon}
-            label={item.label}
-            path={item.path}
-            active={location.pathname === item.path}
-            onClick={() => handleNavClick(item.path)}
-          />
-        ))}
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'));
+          return (
+            <NavItem
+              key={item.path}
+              icon={item.icon}
+              label={item.label}
+              path={item.path}
+              active={isActive}
+              onClick={() => handleNavClick(item.path)}
+            />
+          );
+        })}
       </nav>
 
       {/* Bottom section */}
       <div className="p-4 border-t border-sidebar-border space-y-1">
-        {bottomNavItems.map((item) => (
-            <NavItem
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                path={item.path}
-                active={location.pathname === item.path}
-                onClick={() => handleNavClick(item.path)}
-            />
-        ))}
+        {bottomNavItems.map((item) => {
+            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'));
+            return (
+                <NavItem
+                    key={item.path}
+                    icon={item.icon}
+                    label={item.label}
+                    path={item.path}
+                    active={isActive}
+                    onClick={() => handleNavClick(item.path)}
+                />
+            );
+        })}
       </div>
     </aside>
   );

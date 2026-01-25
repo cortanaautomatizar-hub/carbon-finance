@@ -26,26 +26,29 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const sb = getSupabase();
     if (!sb) return;
 
-    // Create a named channel for transactions
+    let timeoutId: number | null = null;
+    const scheduleRefresh = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = window.setTimeout(() => {
+        refresh();
+        timeoutId = null;
+      }, 200);
+    };
+
+    // Create a named channel for transactions and listen to INSERT/UPDATE/DELETE
     const channel = sb
       .channel('public:transactions')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'transactions' },
-        () => {
-          refresh();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'transactions' },
-        () => {
-          refresh();
-        }
-      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, scheduleRefresh)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'transactions' }, scheduleRefresh)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'transactions' }, scheduleRefresh)
       .subscribe();
 
     return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       try {
         channel.unsubscribe();
       } catch {
