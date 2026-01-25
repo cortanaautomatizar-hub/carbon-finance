@@ -6,19 +6,21 @@ interface TransactionStatsProps {
   transactions: Transaction[];
 }
 
+import Decimal from 'decimal.js';
+
 export const TransactionStats = ({ transactions }: TransactionStatsProps) => {
-  // Calcular estatísticas
-  const totalGasto = transactions.reduce((acc, t) => acc + t.value, 0);
+  // Calcular estatísticas com Decimal para precisão
+  const totalGasto = transactions.reduce((acc, t) => new Decimal(acc).plus(new Decimal(t.amount ?? 0)).toNumber(), 0);
   const transactionCount = transactions.length;
-  const mediaGasto = transactionCount > 0 ? totalGasto / transactionCount : 0;
-  const maiorCompra = transactions.length > 0 ? Math.max(...transactions.map(t => t.value)) : 0;
+  const mediaGasto = transactionCount > 0 ? new Decimal(totalGasto).dividedBy(transactionCount).toNumber() : 0;
+  const maiorCompra = transactions.length > 0 ? Math.max(...transactions.map(t => t.amount ?? 0)) : 0;
   
   // Gastos este mês
   const agora = new Date();
   const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
   const gastosMes = transactions
     .filter(t => new Date(t.date) >= inicioMes)
-    .reduce((acc, t) => acc + t.value, 0);
+    .reduce((acc, t) => new Decimal(acc).plus(new Decimal(t.amount ?? 0)).toNumber(), 0);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

@@ -61,23 +61,42 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const sb = getSupabase();
     if (!sb) throw new Error('Supabase client is not configured');
 
+    // try to enrich payload with auth_uid (RLS) when available
+    let authUid: string | null = null;
+    try {
+      const userResp = await sb.auth.getUser?.();
+      authUid = userResp?.data?.user?.id ?? null;
+    } catch {
+      // ignore: best-effort
+      authUid = null;
+    }
+
     const payload = {
       name: t.name,
       amount: t.amount,
       category: t.category,
       description: t.description,
       date: new Date().toISOString(),
+      auth_uid: authUid,
     } as any;
 
-    const { data, error } = await sb.from('transactions').insert([payload]).select().single();
+    try {
+      console.debug('[Transactions] inserting payload', payload);
+      const { data, error } = await sb.from('transactions').insert([payload]).select().single();
 
-    if (error) {
-      toast({ title: 'Erro', description: 'Não foi possível adicionar a transação', variant: 'destructive' });
-      throw error;
+      if (error) {
+        console.error('[Transactions] insert error', error);
+        toast({ title: 'Erro', description: 'Não foi possível adicionar a transação', variant: 'destructive' });
+        throw error;
+      }
+
+      console.debug('[Transactions] insert success', data);
+      // The realtime subscription will call refresh() automatically.
+      return data;
+    } catch (e) {
+      // Re-throw so callers can handle it
+      throw e;
     }
-
-    // The realtime subscription will call refresh() automatically.
-    return data;
   }, []);
 
   const removeTransaction = useCallback(async (id: number) => {

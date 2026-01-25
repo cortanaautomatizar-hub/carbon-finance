@@ -60,20 +60,13 @@ const getCategoryFromDescription = (description: string): string => {
 export const GastosPorCategoriaChart = () => {
   const [periodo, setPeriodo] = useState("Mensal");
 
-  // Use transactions from context (realtime-aware) and fallback to local cards if none exist
+  // Use transactions from context (realtime-aware). If none, show sample data.
   const { transactions } = useTransactions();
 
-  const allTransactions = (transactions ?? []).map((tx) => ({
+  const usedTransactions = (transactions ?? []).map((tx) => ({
     ...tx,
     category: tx.category || getCategoryFromDescription(tx.description || ''),
   }));
-
-  // If no transactions from backend, fallback to previous local cards dataset
-  const fallbackTransactions = cards.flatMap((card) =>
-    (card.transactions || []).map((tx) => ({ ...tx, category: getCategoryFromDescription(tx.description) }))
-  );
-
-  const usedTransactions = allTransactions.length > 0 ? allTransactions : fallbackTransactions;
 
   // Agrupar por categoria
   const categoriaMap = new Map<string, number>();
