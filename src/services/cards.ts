@@ -109,6 +109,15 @@ export const addTransaction = (cardId: number, tx: Omit<Transaction, "id">) => {
       } catch (e) {
         // ignore
       }
+
+      try {
+        // Also create a global `transactions` row so realtime + global lists update
+        const userResp = await sb.auth.getUser?.();
+        const uid = userResp?.data?.user?.id ?? null;
+        await sb.from('transactions').insert([{ name: newTx.name, amount: newTx.amount, category: newTx.category, description: newTx.description, date: new Date().toISOString(), auth_uid: uid }]);
+      } catch (e) {
+        // ignore insert errors
+      }
     })();
   }
   return newTx;

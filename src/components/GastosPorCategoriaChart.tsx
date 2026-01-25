@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useTransactions } from '@/contexts/TransactionsContext';
 import { cards } from "@/data/cards";
 
 // Mapeamento de categorias baseado em palavras-chave na descrição
@@ -59,20 +60,20 @@ const getCategoryFromDescription = (description: string): string => {
 export const GastosPorCategoriaChart = () => {
   const [periodo, setPeriodo] = useState("Mensal");
 
-  // Agregar todas as transações de todos os cartões
-  const allTransactions = cards.flatMap((card) =>
-    card.transactions.map((tx) => ({
-      ...tx,
-      category: getCategoryFromDescription(tx.description),
-    }))
-  );
+  // Use transactions from context (realtime-aware). If none, show sample data.
+  const { transactions } = useTransactions();
+
+  const usedTransactions = (transactions ?? []).map((tx) => ({
+    ...tx,
+    category: tx.category || getCategoryFromDescription(tx.description || ''),
+  }));
 
   // Agrupar por categoria
   const categoriaMap = new Map<string, number>();
 
-  allTransactions.forEach((tx) => {
+  usedTransactions.forEach((tx) => {
     const current = categoriaMap.get(tx.category) || 0;
-    categoriaMap.set(tx.category, current + tx.amount);
+    categoriaMap.set(tx.category, current + (Number(tx.amount) || 0));
   });
 
   // Se não houver transações, usar dados de exemplo

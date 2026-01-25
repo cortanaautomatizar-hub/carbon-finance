@@ -1,5 +1,7 @@
 
 import { Bell, Search, User, Settings, LifeBuoy, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTranslation } from '@/hooks/useTranslation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,10 +19,12 @@ export const Header = () => {
     navigate("/login");
   };
 
+  const { t, locale, setLocale } = useTranslation();
+
   return (
     <header className="h-16 border-b border-border flex items-center justify-between px-8 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center gap-4">
-        <h1 className="text-xl font-semibold text-foreground">Olá, {auth.user?.name ?? auth.user?.email ?? 'usuário'} 👋</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t('header.ola')}, {auth.user?.name ?? auth.user?.email ?? 'usuário'} 👋</h1>
       </div>
 
       <div className="flex items-center gap-2">
@@ -30,6 +34,19 @@ export const Header = () => {
             <Search size={20} />
           </button>
         </SearchDialog>
+
+        {/* Language selector */}
+        <div className="w-28">
+          <Select value={locale} onValueChange={(v) => setLocale(v as any)}>
+            <SelectTrigger className="w-full h-10 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pt">PT-BR</SelectItem>
+              <SelectItem value="en">EN</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Notifications */}
         <NotificationsMenu items={

@@ -37,6 +37,7 @@ function formatInputToNumber(value: string) {
 export default function NovaTransacao() {
   const { addTransaction } = useTransactions();
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -51,15 +52,20 @@ export default function NovaTransacao() {
 
   const watchedAmount = watch('amount');
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
+    setIsSubmitting(true);
     const amountSigned = data.type === 'saida' ? -Math.abs(data.amount) : Math.abs(data.amount);
     try {
-      addTransaction({ name: data.name, amount: amountSigned, category: data.category, description: data.name });
+      await addTransaction({ name: data.name, amount: amountSigned, category: data.category, description: data.name });
       toast({ title: 'Transação adicionada', description: `${data.name} foi adicionada com sucesso.` });
+
+      // Reset e fechar apenas após sucesso
       reset();
       setOpen(false);
-    } catch (e) {
-      toast({ title: 'Erro', description: 'Não foi possível adicionar a transação.', variant: 'destructive' });
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e?.message || 'Não foi possível adicionar a transação.', variant: 'destructive' });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -160,8 +166,8 @@ export default function NovaTransacao() {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" className={cn('')}>Salvar</Button>
+              <Button variant="ghost" onClick={() => setOpen(false)} disabled={isSubmitting}>Cancelar</Button>
+              <Button type="submit" className={cn('')} disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : 'Salvar'}</Button>
             </div>
           </form>
         </Form>
