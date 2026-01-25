@@ -41,17 +41,7 @@ const NavItem = ({ icon, label, active, onClick }: NavItemProps) => (
   </button>
 );
 
-// navItems moved inside component to support translation
-  
-  { icon: <TrendingUp size={20} />, label: "Investimentos", path: "/investimentos" },
-  { icon: <Repeat size={20} />, label: "Controle de Assinaturas", path: "/assinaturas" },
-];
 
-const bottomNavItems = [
-    { icon: <Settings size={20} />, label: "Configurações", path: "/configuracoes" },
-    { icon: <HelpCircle size={20} />, label: "Ajuda", path: "/ajuda" },
-    { icon: <LogOut size={20} />, label: "Sair", path: "/sair" },
-]
 
 export const Sidebar = () => {
   const { t } = useTranslation();
