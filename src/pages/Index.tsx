@@ -54,7 +54,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold">Dashboard</h1>
+        <h1 className="text-3xl font-semibold">Carbon Finance 2.0 🚀</h1>
         <p className="text-muted-foreground">Visão geral das suas finanças</p>
       </div>
 
