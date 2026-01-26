@@ -50,3 +50,16 @@ Se preferir aplicar manualmente, cole o conteúdo de `supabase/003_create_transa
 ## Observações finais / Sugestões
 - Recomendo disparar o workflow em um ambiente de staging/produção somente após garantir que o secret `SUPABASE_DB_URL` esteja configurado e que haja backup do banco (snapshot). 📦
 - Se quiser, posso: abrir o PR com esta descrição, ou aguardar você revisar antes de abrir. 🚀
+
+---
+
+## Comando para criar PR no GitHub
+Para criar o Pull Request com as alterações, utilize o seguinte comando:
+
+```bash
+gh pr create --base main --head fix/eslint-and-migrations-003 \
+  --title "chore: fix ESLint + apply migration 003 (transactions)" \
+  --body-file .github/PULL_REQUEST_TEMPLATE/fix-eslint-and-migrations-003.md \
+  --reviewer alanderson --label chore,migration
+```
+
