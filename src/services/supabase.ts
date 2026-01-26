@@ -23,8 +23,13 @@ export class UserContextError extends Error {
 
 // Test helper: expose a setter only during tests via globalThis to avoid exporting test-only symbols
 // (Vitest runs with import.meta.env.MODE === 'test').
+declare global {
+  // augment globalThis for test helpers
+  var __setSupabaseClient: ((client: SupabaseClient | null) => void) | undefined;
+}
+
 if (import.meta.env.MODE === 'test') {
-  (globalThis as any).__setSupabaseClient = (client: SupabaseClient | null) => {
+  globalThis.__setSupabaseClient = (client: SupabaseClient | null) => {
     supabase = client;
   };
 }
@@ -77,7 +82,7 @@ export const sbCreateCard = async (
     throw new UserContextError('Usuário não autenticado: não é possível criar cartão sem associação a um usuário');
   }
 
-  const row: any = { payload };
+  const row: { payload: Partial<CreditCardProps>; user_id?: number; auth_uid?: string } = { payload };
   if (userId) row.user_id = userId;
   if (uid) row.auth_uid = uid;
 

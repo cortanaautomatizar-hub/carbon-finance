@@ -41,6 +41,8 @@ fi
 
 # 4. Validar mensagem de commit (será validada no commit-msg)
 echo "${GREEN}✅ Pré-commit verificação concluída!${NC}"
+echo "${GREEN}   Rodando lint-staged...${NC}"
+npx lint-staged || { echo "${RED}❌ lint-staged falhou. Abortando commit.${NC}"; exit 1; }
 echo "${GREEN}   Revise suas mudanças com: git diff --cached${NC}"
 
 exit 0

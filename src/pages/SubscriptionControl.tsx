@@ -24,7 +24,7 @@ const initialEnhancedSubscriptions = initialSubscriptions.map(sub => ({
     card: "Cartão final 8842",
 }));
 
-const getInitials = (name) => {
+const getInitials = (name: string | undefined) => {
     if (!name) return "";
     const words = name.split(' ');
     if (words.length > 1) {
@@ -52,9 +52,19 @@ const categoryColors = {
 };
 const categories = Object.keys(categoryColors);
 
+// --- DADOS DE TIPO ---
+interface Subscription { id?: number; name: string; amount: number; category: string; color?: string; renewalDate?: string; status?: string; card?: string; }
+interface AddSubscriptionModalProps {
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    onAddSubscription?: (payload: Omit<Subscription, 'id' | 'status' | 'card'>) => void;
+    initialData?: Subscription | null;
+    onSaveSubscription?: (updated: Subscription) => void;
+}
+
 // --- COMPONENTE DO MODAL ---
 
-const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }: { open?: any; onOpenChange?: any; onAddSubscription?: any; initialData?: any; onSaveSubscription?: any }) => {
+const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({ open = false, onOpenChange, onAddSubscription, initialData = null, onSaveSubscription }) => {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
@@ -75,7 +85,8 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialDa
             setColor(initialData.color || "#71717A");
             try {
                 setRenewalDate(initialData.renewalDate ? format(parseISO(initialData.renewalDate), 'yyyy-MM-dd') : format(add(today, { days: 30 }), 'yyyy-MM-dd'));
-            } catch {
+            } catch (e) {
+                console.debug('parsing renewal date failed', e);
                 setRenewalDate(format(add(today, { days: 30 }), 'yyyy-MM-dd'));
             }
         } else {
@@ -86,7 +97,7 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialDa
         // focus when modal opens
         if (open) {
             setTimeout(() => {
-                try { nameRef.current?.focus(); } catch {}
+                try { nameRef.current?.focus(); } catch (e) { console.debug('focus failed', e); }
             }, 50);
         }
     }, [initialData, open]);
@@ -190,7 +201,7 @@ export const SubscriptionControl = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSubscription, setEditingSubscription] = useState(null);
 
-    const handleAddSubscription = (newSub) => {
+    const handleAddSubscription = (newSub: Omit<Subscription,'id'|'status'|'card'>) => {
         const finalNewSub = {
             name: newSub.name,
             amount: newSub.amount,
@@ -205,7 +216,7 @@ export const SubscriptionControl = () => {
         svcSetServiceColor(saved.name, newSub.color);
         setServiceColors(prev => ({ ...prev, [saved.name]: newSub.color }));
         setIsModalOpen(false);
-        try { toast({ title: 'Assinatura adicionada', description: `${saved.name} foi adicionada.` }); } catch {}
+        try { toast({ title: 'Assinatura adicionada', description: `${saved.name} foi adicionada.` }); } catch (e) { console.debug('toast failed', e); }
     };
 
     const handleToggleStatus = (id) => {
@@ -214,7 +225,7 @@ export const SubscriptionControl = () => {
             const changed = next.find(s => s.id === id);
             // persist
             if (changed) svcUpdateSubscription(changed);
-            try { toast({ title: changed.status === 'active' ? 'Assinatura reativada' : 'Assinatura pausada', description: `${changed.name}` }); } catch {}
+            try { toast({ title: changed.status === 'active' ? 'Assinatura reativada' : 'Assinatura pausada', description: `${changed.name}` }); } catch (e) { console.debug('toast failed', e); }
             return next;
         });
     };
@@ -260,7 +271,7 @@ export const SubscriptionControl = () => {
             });
         }
         setSubscriptions(prev => prev.filter(s => s.id !== id));
-        try { toast({ title: 'Assinatura excluída', description: `${name} foi removida.`, variant: 'destructive' }); } catch {}
+        try { toast({ title: 'Assinatura excluída', description: `${name} foi removida.`, variant: 'destructive' }); } catch (e) { console.debug('toast failed', e); }
     };
 
     const [deleteTarget, setDeleteTarget] = useState(null);
