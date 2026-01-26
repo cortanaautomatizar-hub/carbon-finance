@@ -21,7 +21,9 @@ create index if not exists transactions_date_idx on transactions(date desc);
 alter table transactions enable row level security;
 
 -- Policy: allow authenticated users to insert/select/update/delete their own transactions
-create policy if not exists "transactions_policy_auth" on transactions
+-- Use DROP + CREATE for compatibility with Postgres versions that don't support CREATE POLICY IF NOT EXISTS
+drop policy if exists transactions_policy_auth on transactions;
+create policy transactions_policy_auth on transactions
   using (auth_uid = auth.uid())
   with check (auth_uid = auth.uid());
 
