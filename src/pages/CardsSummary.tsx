@@ -31,7 +31,9 @@ const CardsSummary = () => {
     await load();
   };
 
-  const handleSaveCard = async (newCardData: any) => {
+type NewCardInput = Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & { invoice?: CreditCardProps['invoice'] };
+
+  const handleSaveCard = async (newCardData: NewCardInput) => {
     await cardsService.create({
       name: newCardData.name,
       number: newCardData.number,
@@ -43,7 +45,7 @@ const CardsSummary = () => {
       textColor: newCardData.textColor || '#ffffff',
       dueDay: newCardData.dueDay,
       closingDay: newCardData.closingDay,
-    } as any);
+    });
 
     await load();
     setIsCardFormOpen(false);

@@ -1,4 +1,7 @@
-import type { Config } from "tailwindcss";
+import type { Config, Plugin } from "tailwindcss";
+import tailwindAnimate from "tailwindcss-animate"; // CommonJS plugin imported synchronously
+
+const tailwindAnimatePlugin = (tailwindAnimate as unknown) as Plugin;
 
 export default {
   darkMode: ["class"],
@@ -91,5 +94,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    // use the synchronously imported plugin; casted to any for compatibility with ESM/CJS interop
+    tailwindAnimatePlugin
+  ],
 } satisfies Config;

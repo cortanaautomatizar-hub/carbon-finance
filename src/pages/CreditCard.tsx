@@ -46,7 +46,9 @@ export default function CreditCardPage() {
         void load();
     }, []);
 
-    const handleSaveCard = async (newCardData: any) => {
+    type NewCardInput = Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & { invoice?: CreditCardProps['invoice'] };
+
+    const handleSaveCard = async (newCardData: NewCardInput) => {
         const created = await cardsService.create({
             name: newCardData.name,
             number: newCardData.number,
@@ -58,10 +60,10 @@ export default function CreditCardPage() {
             textColor: newCardData.textColor || '#ffffff',
             dueDay: newCardData.dueDay,
             closingDay: newCardData.closingDay,
-        } as any);
+        });
 
         await load();
-        setSelectedCard(created as any);
+        setSelectedCard(created);
         setIsCardFormOpen(false);
         setTimeout(async () => {
             const list = await cardsService.getAll();

@@ -46,9 +46,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // attempt to get current session/user from Supabase
         // supabase-js v2 exposes auth.getSession / auth.getUser
         // best-effort without strict typing here
-        // @ts-ignore
+        // @ts-expect-error - supabase auth may not be fully typed here; best-effort invocation
         const sessionResp = await sb.auth.getSession?.();
-        // @ts-ignore
+        // @ts-expect-error - best-effort invocation
         const userResp = await sb.auth.getUser?.();
 
         const sbUser = userResp?.data?.user ?? sessionResp?.data?.session?.user ?? null;
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsInitialized(true);
       }
     })();
-  }, []);
+  }, [isInitialized, token, user]);
 
   useEffect(() => {
     if (token) localStorage.setItem("auth_token", token);
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const sb = getSupabase();
     if (sb) {
       try {
-        // @ts-ignore
+        // @ts-expect-error - attempt signOut if available on supabase client
         await sb.auth.signOut?.();
       } catch (e) {
         // ignore

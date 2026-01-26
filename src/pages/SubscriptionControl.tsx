@@ -24,7 +24,7 @@ const initialEnhancedSubscriptions = initialSubscriptions.map(sub => ({
     card: "Cartão final 8842",
 }));
 
-const getInitials = (name) => {
+const getInitials = (name: string | undefined): string => {
     if (!name) return "";
     const words = name.split(' ');
     if (words.length > 1) {
@@ -33,7 +33,7 @@ const getInitials = (name) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const initialServiceColors = {
+const initialServiceColors: Record<string, string> = {
     "Netflix": "#E50914",
     "Spotify": "#1DB954",
     "Amazon Prime": "#00A8E1",
@@ -54,7 +54,25 @@ const categories = Object.keys(categoryColors);
 
 // --- COMPONENTE DO MODAL ---
 
-const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }: { open?: any; onOpenChange?: any; onAddSubscription?: any; initialData?: any; onSaveSubscription?: any }) => {
+import type { Subscription } from '@/services/subscriptions';
+
+type SubscriptionPayload = {
+    name: string;
+    amount: number;
+    category: string;
+    color?: string;
+    renewalDate?: string;
+};
+
+type AddSubscriptionModalProps = {
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    onAddSubscription?: (payload: SubscriptionPayload) => void;
+    initialData?: Subscription | null;
+    onSaveSubscription?: (updated: Subscription) => void;
+};
+
+const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialData, onSaveSubscription }: AddSubscriptionModalProps) => {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
@@ -75,7 +93,8 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialDa
             setColor(initialData.color || "#71717A");
             try {
                 setRenewalDate(initialData.renewalDate ? format(parseISO(initialData.renewalDate), 'yyyy-MM-dd') : format(add(today, { days: 30 }), 'yyyy-MM-dd'));
-            } catch {
+            } catch (e) {
+                // fallback to default if parsing fails
                 setRenewalDate(format(add(today, { days: 30 }), 'yyyy-MM-dd'));
             }
         } else {
@@ -86,7 +105,7 @@ const AddSubscriptionModal = ({ open, onOpenChange, onAddSubscription, initialDa
         // focus when modal opens
         if (open) {
             setTimeout(() => {
-                try { nameRef.current?.focus(); } catch {}
+                try { nameRef.current?.focus(); } catch (e) { /* ignore focus errors */ }
             }, 50);
         }
     }, [initialData, open]);
@@ -188,38 +207,38 @@ export const SubscriptionControl = () => {
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [sortOrder, setSortOrder] = useState("renewalDate");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingSubscription, setEditingSubscription] = useState(null);
+    const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
 
-    const handleAddSubscription = (newSub) => {
-        const finalNewSub = {
+    const handleAddSubscription = (newSub: SubscriptionPayload) => {
+        const finalNewSub: Omit<Subscription, 'id'> = {
             name: newSub.name,
             amount: newSub.amount,
             category: newSub.category,
             status: 'active',
-            renewalDate: add(today, { days: 30 }).toISOString(),
+            renewalDate: newSub.renewalDate ?? add(today, { days: 30 }).toISOString(),
             card: 'Cartão final 8842'
         };
 
         const saved = svcAddSubscription(finalNewSub);
         setSubscriptions(prev => [...prev, saved]);
-        svcSetServiceColor(saved.name, newSub.color);
-        setServiceColors(prev => ({ ...prev, [saved.name]: newSub.color }));
+        if (newSub.color) svcSetServiceColor(saved.name, newSub.color);
+        setServiceColors(prev => ({ ...prev, [saved.name]: newSub.color ?? prev[saved.name] }));
         setIsModalOpen(false);
-        try { toast({ title: 'Assinatura adicionada', description: `${saved.name} foi adicionada.` }); } catch {}
+        try { toast({ title: 'Assinatura adicionada', description: `${saved.name} foi adicionada.` }); } catch (e) { /* ignore toast failures */ }
     };
 
-    const handleToggleStatus = (id) => {
+    const handleToggleStatus = (id: number) => {
         setSubscriptions(prev => {
             const next = prev.map(s => s.id === id ? { ...s, status: s.status === 'active' ? 'paused' : 'active' } : s);
             const changed = next.find(s => s.id === id);
             // persist
             if (changed) svcUpdateSubscription(changed);
-            try { toast({ title: changed.status === 'active' ? 'Assinatura reativada' : 'Assinatura pausada', description: `${changed.name}` }); } catch {}
+            try { toast({ title: changed.status === 'active' ? 'Assinatura reativada' : 'Assinatura pausada', description: `${changed.name}` }); } catch (e) { /* ignore toast */ }
             return next;
         });
     };
 
-    const handleSaveSubscription = (updated) => {
+    const handleSaveSubscription = (updated: Subscription) => {
         setSubscriptions(prev => prev.map(s => s.id === updated.id ? { ...s, name: updated.name, amount: updated.amount, category: updated.category, color: updated.color, renewalDate: updated.renewalDate } : s));
         // update colors mapping, remove old key if name changed
         setServiceColors(prev => {
@@ -246,7 +265,7 @@ export const SubscriptionControl = () => {
             setEditingSubscription(null);
     };
 
-    const handleDeleteSubscription = (id) => {
+    const handleDeleteSubscription = (id: number) => {
         const sub = subscriptions.find(s => s.id === id);
         const name = sub ? sub.name : 'assinatura';
         const removed = svcRemoveSubscription(id);
@@ -260,10 +279,10 @@ export const SubscriptionControl = () => {
             });
         }
         setSubscriptions(prev => prev.filter(s => s.id !== id));
-        try { toast({ title: 'Assinatura excluída', description: `${name} foi removida.`, variant: 'destructive' }); } catch {}
+        try { toast({ title: 'Assinatura excluída', description: `${name} foi removida.`, variant: 'destructive' }); } catch (e) { /* ignore toast */ }
     };
 
-    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState<Subscription | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
     // persist subscriptions and serviceColors to localStorage
