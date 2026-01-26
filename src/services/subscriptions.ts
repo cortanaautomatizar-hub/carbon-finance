@@ -5,7 +5,7 @@ import getSupabase from './supabase';
 
 const hasSupabase = () => !!getSupabase();
 
-const trySync = async (fn: () => Promise<any>) => {
+const trySync = async (fn: () => Promise<unknown>) => {
   try {
     await fn();
   } catch (e) {
@@ -14,7 +14,7 @@ const trySync = async (fn: () => Promise<any>) => {
   }
 };
 
-type Subscription = {
+export type Subscription = {
   id: number;
   name: string;
   amount: number;
@@ -31,16 +31,19 @@ const readJson = (key: string) => {
     if (typeof window === 'undefined') return null;
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;
-  } catch {
+  } catch (e) {
+    // ignore JSON parse errors and return null
     return null;
   }
 };
 
-const writeJson = (key: string, value: any) => {
+const writeJson = (key: string, value: unknown) => {
   try {
     if (typeof window === 'undefined') return;
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
+  } catch (e) {
+    // ignore storage errors
+  }
 };
 
 export function getAllSubscriptions(): Subscription[] {
@@ -72,9 +75,9 @@ export function addSubscription(payload: Omit<Subscription, 'id'>): Subscription
     const sb = getSupabase();
     trySync(async () => {
       // get current supabase user id (if available)
-      // @ts-ignore
+        // @ts-expect-error - supabase client types are optional here; best-effort invocation
       const userResp = await sb.auth.getUser?.();
-      // @ts-ignore
+      // @ts-expect-error - best-effort access to returned structure
       const sbUser = userResp?.data?.user ?? null;
       await sb.from('subscriptions').insert([{ payload: entry, auth_uid: sbUser?.id ?? null }]);
     });

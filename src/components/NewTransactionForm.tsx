@@ -37,7 +37,7 @@ export function NewTransactionForm({ onSave, onDone }: { onSave: (data: { descri
 
     useEffect(() => {
         form.setFocus("description");
-    }, [form.setFocus]);
+    }, [form]);
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         // Convert date to string format for compatibility

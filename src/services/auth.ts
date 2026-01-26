@@ -34,7 +34,9 @@ const getDefaultUsers = (): UserRecord[] => {
 const saveUsers = (users: UserRecord[]) => {
   try {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  } catch {}
+  } catch (e) {
+    // ignore storage errors
+  }
 };
 
 const generateToken = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -43,7 +45,7 @@ export const register = async (payload: { name: string; email: string; phone?: s
   const sb = getSupabase();
   if (sb) {
     // Use Supabase signUp flow
-    // @ts-ignore
+    // @ts-expect-error - Supabase auth API allows dynamic metadata in options.data; strict typing not enforced in v2
     const { data, error } = await sb.auth.signUp({ email: payload.email, password: payload.password, options: { data: { name: payload.name, phone: payload.phone } } });
     if (error) throw error;
     const sbUser = data?.user ?? null;
@@ -66,7 +68,7 @@ export const login = async (identifier: string, password: string) => {
   const sb = getSupabase();
   if (sb) {
     // use Supabase sign-in
-    // @ts-ignore
+    // @ts-expect-error - Supabase signInWithPassword may not be fully typed; best-effort invocation
     const { data, error } = await sb.auth.signInWithPassword({ email: identifier, password });
     if (error) throw error;
     const session = data?.session ?? null;

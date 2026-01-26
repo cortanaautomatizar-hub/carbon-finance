@@ -91,5 +91,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    // @ts-expect-error - tailwindcss-animate plugin is CommonJS; import works at runtime
+    (await import("tailwindcss-animate")).default
+  ],
 } satisfies Config;
