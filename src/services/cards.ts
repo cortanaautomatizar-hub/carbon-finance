@@ -1,5 +1,5 @@
 import { CreditCardProps, Transaction } from "@/components/CreditCard";
-import { cards as initialCards } from "@/data/cards";
+import { cards as initialCards } from "../data/cards";
 import { getSupabase, sbGetCards, sbCreateCard, sbUpdateCard, sbDeleteCard } from "./supabase";
 
 let currentUserId: number | null = null;

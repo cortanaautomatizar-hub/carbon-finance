@@ -33,6 +33,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Prettier check
+        run: npx prettier --check .
+
+      - name: Run tests
+        run: npm run test -- --coverage
+
       - name: Build
         run: npm run build
 
