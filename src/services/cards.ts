@@ -201,4 +201,4 @@ export const removeTransaction = (cardId: number, txId: number) => {
   }
 };
 
-export default { getAll, getById, create, update, remove, addTransaction, removeTransaction };
+export default { getAll, getById, create, update, remove, addTransaction, removeTransaction, onChange, payInvoice };
