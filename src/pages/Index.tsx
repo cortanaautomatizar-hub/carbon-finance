@@ -51,6 +51,19 @@ export default function DashboardPage() {
   const usedPercent = totalLimit ? Math.round((totalUsed / totalLimit) * 100) : 0;
   const totalAvailable = totalLimit - totalUsed;
 
+  // upcoming invoices sorted by due date
+  const upcomingInvoices = [...cards]
+    .filter(c => c.invoice && c.invoice.total > 0 && c.invoice.dueDate)
+    .map(c => ({
+      ...c,
+      due: (() => {
+        const [d, m, y] = c.invoice.dueDate.split('/').map(s=>parseInt(s,10));
+        return new Date(y||new Date().getFullYear(), (m||1)-1, d||1);
+      })()
+    }))
+    .sort((a,b)=>a.due.getTime()-b.due.getTime())
+    .slice(0,3);
+
   return (
     <div className="space-y-8">
       <div>
@@ -58,7 +71,25 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Visão geral das suas finanças</p>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* upcoming invoices */}
+        {upcomingInvoices.length > 0 && (
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Próximas Faturas</h2>
+            <div className="space-y-3">
+              {upcomingInvoices.map(c => (
+                <div key={c.id} className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">{c.name}</p>
+                    <p className="text-sm text-muted-foreground">Vence em {c.due.toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <p className="font-semibold">{formatarMoedaBRL(c.invoice.total)}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Card: Saldo Consolidado (calculado) */}
         <Card className="p-6 flex flex-col justify-between lg:col-span-1">
