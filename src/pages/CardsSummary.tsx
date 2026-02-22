@@ -128,12 +128,12 @@ type NewCardInput = Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground">
-            Nenhum cartão cadastrado. Use o botão abaixo para adicionar o primeiro.
-          </div>
-        ) : (
-          cards.map((card) => (
+          {cards.length === 0 && (
+            <div className="col-span-full text-center text-muted-foreground">
+              Nenhum cartão cadastrado. Use o botão abaixo para adicionar o primeiro.
+            </div>
+          )}
+          {cards.map((card) => (
             <Card key={card.id} className={`bg-card p-5 flex flex-col justify-between border-border`}>
               <div>
                 <div className="flex justify-between items-start mb-4">
