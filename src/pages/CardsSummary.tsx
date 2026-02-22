@@ -69,7 +69,7 @@ type NewCardInput = Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & {
         
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-semibold">Resumo Geral</h1>
+            <h1 className="text-3xl font-semibold">Resumo Geral (atualizado)</h1>
             <p className="text-muted-foreground">Visão consolidada dos seus limites e faturas.</p>
           </div>
           <Button variant="ghost" className="bg-card p-2 h-auto rounded-md">
