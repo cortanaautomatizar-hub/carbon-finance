@@ -26,10 +26,11 @@ export const NotificationPanel = ({ cards }: NotificationPanelProps) => {
       .reduce((acc, t) => acc + t.amount, 0) ?? 0;
 
     // Fatura vencendo
-    if (card.invoice.total > 0) {
-      const dueDateParts = card.invoice.dueDate.split('/');
-      const dueDay = parseInt(dueDateParts[0]);
-      const dueMonth = parseInt(dueDateParts[1]);
+    if (card.invoice?.total > 0) {
+      const rawDue = card.invoice.dueDate || "01/01/1970";
+      const dueDateParts = rawDue.split('/');
+      const dueDay = parseInt(dueDateParts[0]) || 1;
+      const dueMonth = parseInt(dueDateParts[1]) || 1;
       const dueYear = parseInt(dueDateParts[2]) || agora.getFullYear();
       
       const dueDate = new Date(dueYear, dueMonth - 1, dueDay);
@@ -40,7 +41,7 @@ export const NotificationPanel = ({ cards }: NotificationPanelProps) => {
           id: `due-${card.id}`,
           type: "warning",
           title: "Fatura vencendo",
-          message: `${card.name}: vence em ${daysUntilDue} dia(s) (${card.invoice.dueDate})`,
+          message: `${card.name}: vence em ${daysUntilDue} dia(s) (${card.invoice?.dueDate || '??/??/????'})`,
           icon: <Clock className="w-4 h-4" />,
         });
       } else if (daysUntilDue <= 0) {
@@ -48,7 +49,7 @@ export const NotificationPanel = ({ cards }: NotificationPanelProps) => {
           id: `overdue-${card.id}`,
           type: "error",
           title: "Fatura vencida",
-          message: `${card.name}: pague agora! (R$ ${card.invoice.total.toFixed(2)})`,
+          message: `${card.name}: pague agora! (R$ ${card.invoice?.total?.toFixed(2) ?? '0.00'})`,
           icon: <AlertCircle className="w-4 h-4" />,
         });
       }
