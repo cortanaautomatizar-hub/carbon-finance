@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Decimal from 'decimal.js';
 import getSupabase from '@/services/supabase';
+import { demoTransactions } from '@/data/transactions';
 
 export type TransactionRecord = {
   id: number;
@@ -33,7 +34,10 @@ export function useTransactions() {
     try {
       const sb = getSupabase();
       if (!sb) {
-        throw new Error('Supabase client is not configured');
+        // Fallback: use demo transactions when Supabase is not configured
+        setTransactions(demoTransactions);
+        setLoading(false);
+        return;
       }
 
       const { data, error } = await sb
@@ -42,6 +46,13 @@ export function useTransactions() {
         .order('date', { ascending: false });
 
       if (error) throw error;
+
+      // If no data from Supabase, use demo transactions
+      if (!data || data.length === 0) {
+        setTransactions(demoTransactions);
+        setLoading(false);
+        return;
+      }
 
       // Defensive: ensure amounts are numbers and pick expected fields
       const normalized = (data ?? []).map((r: Record<string, unknown>) => ({
@@ -56,6 +67,8 @@ export function useTransactions() {
 
       setTransactions(normalized);
     } catch (e: unknown) {
+      // Fallback to demo transactions on error
+      setTransactions(demoTransactions);
       setError(e instanceof Error ? e : new Error(String(e)));
     } finally {
       setLoading(false);
