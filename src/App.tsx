@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import CreditCardPage from "./pages/CreditCard";
 import CardDetail from "./pages/CardDetail";
 import CardsSummaryPage from "./pages/CardsSummary";
+import ExtratoPage from "./pages/Extrato";
 import { SubscriptionControl } from "./pages/SubscriptionControl";
 import FinancialAssistantPage from "./pages/FinancialAssistant";
 import PaymentsPage from "./pages/PaymentsPage";
@@ -42,6 +43,7 @@ const App = () => (
             {/* Rotas com o layout principal (protegidas) */}
             <Route element={<RequireAuth><Layout /></RequireAuth>}>
               <Route path="/" element={<Index />} />
+              <Route path="/extrato" element={<ExtratoPage />} />
               <Route path="/cartao" element={<CreditCardPage />} />
               <Route path="/cartao/:id" element={<CardDetail />} />
               <Route path="/resumo-cartoes" element={<CardsSummaryPage />} />
