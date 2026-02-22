@@ -217,6 +217,7 @@ export default function DashboardPage() {
                 <Button variant="secondary" className="bg-gray-600/50 text-white hover:bg-gray-500/50">Saiba mais</Button>
             </Card>
         </div>
+      </div>
 
       </div>
     </div>
