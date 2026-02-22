@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const usedSupabase = await trySupabaseSession();
         if (!usedSupabase) {
           // fallback: auto-login demo in non-production or Vercel preview environments
-          const allowDemo = process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'preview';
+          const allowDemo = import.meta.env.MODE !== 'production' || import.meta.env.VERCEL_ENV === 'preview';
           if (!token && !user && allowDemo) {
             setUser(DEMO_USER);
             setToken(DEMO_TOKEN);
@@ -136,7 +136,7 @@ export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children 
   const location = useLocation();
 
   // Allow previews to view the app with the demo user even when no Supabase token
-  const isPreviewView = process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV !== 'production';
+  const isPreviewView = import.meta.env.VERCEL_ENV === 'preview' || import.meta.env.MODE !== 'production';
   const { user } = useAuth();
 
   if (!token) {
