@@ -80,18 +80,7 @@ export default function CardDetail() {
 
   const handlePayInvoice = async () => {
     if (card.invoice.total === 0) return;
-    const newHistoryEntry = {
-      month: new Date().toLocaleString('default', { month: 'long' }) + ' ' + new Date().getFullYear(),
-      value: card.invoice.total,
-      status: 'paga',
-    };
-    const updated: CreditCardProps = {
-      ...card,
-      used: 0,
-      transactions: [],
-      invoice: { ...card.invoice, total: 0, history: [...card.invoice.history, newHistoryEntry] },
-    } as CreditCardProps;
-    await cardsService.update(card.id, updated);
+    await cardsService.payInvoice(card.id);
     await load();
     toast({ title: 'Fatura paga com sucesso!' });
   };

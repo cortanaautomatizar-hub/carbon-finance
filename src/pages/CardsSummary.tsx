@@ -10,6 +10,7 @@ import { CreditCardProps } from "@/components/CreditCard";
 import { NotificationPanel } from "@/components/NotificationPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NewCreditCardForm } from "@/components/NewCreditCardForm";
+import { toast } from "@/components/ui/use-toast";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -20,6 +21,18 @@ const CardsSummary = () => {
   const [isCardFormOpen, setIsCardFormOpen] = useState(false);
 
   const load = async () => setCards(await cardsService.getAll());
+
+  // keep list in sync when cards change elsewhere (payment, edits, etc.)
+  useEffect(() => {
+    const unsubscribe = cardsService.onChange(load);
+    return unsubscribe;
+  }, []);
+
+  // reload whenever cardsService emits a change event
+  useEffect(() => {
+    const unsubscribe = cardsService.onChange(load);
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     void load();
@@ -163,6 +176,22 @@ type NewCardInput = Omit<CreditCardProps, 'id' | 'transactions' | 'invoice'> & {
                 <p className="text-muted-foreground">Limite Total</p>
                 <p className="font-semibold">{formatCurrency(card.limit ?? 0)}</p>
               </div>
+              {card.invoice?.total > 0 && (
+                <div className="mt-3">
+                  <Button
+                    variant="gold"
+                    size="sm"
+                    onClick={async () => {
+                      await cardsService.payInvoice(card.id);
+                      load();
+                      toast({ title: 'Fatura paga com sucesso!' });
+                    }}
+                    className="w-full"
+                  >
+                    Pagar Fatura
+                  </Button>
+                </div>
+              )}
             </Card>
           ))}
           <Card className="bg-card border-dashed border-border flex flex-col items-center justify-center p-5 min-h-[220px]">
