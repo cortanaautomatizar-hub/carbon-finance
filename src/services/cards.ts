@@ -15,6 +15,10 @@ const getStorageKey = (): string => {
 
 const loadStorage = (): CreditCardProps[] => {
   try {
+    if (!currentUserId) {
+      // if we don't have a user yet (e.g. not logged in) just return defaults
+      return initialCards;
+    }
     const raw = localStorage.getItem(getStorageKey());
     if (!raw) return initialCards;
     return JSON.parse(raw) as CreditCardProps[];
@@ -42,7 +46,11 @@ export const getAll = async (): Promise<CreditCardProps[]> => {
       // fallback to local
     }
   }
-  return loadStorage();
+  try {
+    return loadStorage();
+  } catch (e) {
+    return initialCards;
+  }
 };
 
 // simple pub/sub so other components can react when cards change
